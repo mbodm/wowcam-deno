@@ -1,4 +1,5 @@
 import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
+import * as puppeteer from "./puppeteer.ts";
 
 function handleRequest(request) {
   const { pathname } = new URL(request.url);
@@ -24,9 +25,11 @@ function handleRequest(request) {
   // Respond with JSON
   if (pathname.startsWith("/json")) {
     // Use stringify function to convert javascript object to JSON string.
-    const json = JSON.stringify({
-      message: "Hello from Deno Deploy",
-    });
+    // const json = JSON.stringify({
+    //   message: "Hello from Deno Deploy",
+    // });
+    const result = puppeteer.run();
+    const json = JSON.stringify(result);
 
     return new Response(json, {
       headers: {
