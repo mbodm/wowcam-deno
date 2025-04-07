@@ -1,63 +1,71 @@
-import { listenAndServe } from "https://deno.land/std@0.111.0/http/server.ts";
-import * as puppeteer from "./puppeteer.ts";
+import * as browser from "./browser.ts";
+import * as logic from "./logic.ts";
+import * as bql from "./bql.ts";
+import * as logger from "./logger.ts";
 
-function handleRequest(request) {
-  const { pathname } = new URL(request.url);
-
-  // Respond with HTML
-  if (pathname.startsWith("/html")) {
-    const html = `<html>
-      <p><b>Message:</b> Hello from Deno Deploy.</p>
-      </html>`;
-
-    return new Response(html, {
-      headers: {
-        // The interpretation of the body of the response by the client depends
-        // on the 'content-type' header.
-        // The "text/html" part implies to the client that the content is HTML
-        // and the "charset=UTF-8" part implies to the client that the content
-        // is encoded using UTF-8.
-        "content-type": "text/html; charset=UTF-8",
-      },
-    });
-  }
-
-  // Respond with JSON
-  if (pathname.startsWith("/json")) {
-    // Use stringify function to convert javascript object to JSON string.
-    // const json = JSON.stringify({
-    //   message: "Hello from Deno Deploy",
-    // });
-    const result = puppeteer.run();
-    const json = JSON.stringify(result);
-
-    return new Response(json, {
-      headers: {
-        "content-type": "application/json; charset=UTF-8",
-      },
-    });
-  }
-
-  return new Response(
-    `<body
-      align="center"
-      style="font-family: Avenir, Helvetica, Arial, sans-serif; font-size: 1.5rem;"
-    >
-      <h1>Return JSON and/or HTML Example</h1>
-      <p>
-        <a href="/html">/html</a> - responds with HTML to the request.
-      </p>
-      <p>
-        <a href="/json">/json</a> - responds with JSON to the request.
-      </p>
-    </body>`,
-    {
-      headers: {
-        "content-type": "text/html; charset=UTF-8",
-      },
-    },
-  );
+if (import.meta.main) {
+  Deno.serve(async (request: Request) => {
+    const pathname = new URL(request.url).pathname;
+    const method = request.method;
+    if (method == "GET" && pathname === "/") {
+      return new Response(`
+      <body align="center" style="font-family: Avenir, Helvetica, Arial, sans-serif; font-size: 1.5rem;">
+      <h1>Available endpoints:</h1>
+      <p><a href="/html">/html</a> -> Say hello</p>
+      <p><a href="/deinit">/deinit</a> -> De-Initialize logic</p>
+      <p><a href="/run">/run</a> -> Run logic</p>
+      <p><a href="/bql">/bql</a> -> Run BQL</p>
+      </body>`,
+        {
+          headers: {
+            "content-type": "text/html; charset=UTF-8",
+          },
+        },
+      );
+    }
+    if (method == "GET" && pathname.startsWith("/html")) {
+      const html = `<html><p>Hello from Deno!</p></html>`;
+      return new Response(html, {
+        headers: { "content-type": "text/html; charset=UTF-8" },
+      });
+    }
+    if (method == "GET" && pathname.startsWith("/deinit")) {
+      const success = await browser.deinit();
+      const json = JSON.stringify({ success });
+      return new Response(json, {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+        },
+      });
+    }
+    if (method == "GET" && pathname.startsWith("/run")) {
+      logger.log("main -> received request - starting logic now");
+      const url = new URL(request.url);
+      const target = url.searchParams.get('target') ?? undefined;
+      if (target) {
+        logger.log(`has target addon -> ${target}`);
+      }
+      else {
+        logger.log(`has no target addon -> scraping all addons`);
+      }
+      const result = await logic.run(target);
+      logger.log("main -> logic ended - returning response now");
+      const json = JSON.stringify(result);
+      return new Response(json, {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+        },
+      });
+    }
+    if (method == "GET" && pathname.startsWith("/bql")) {
+      const finals = await bql.sendQuery();
+      const json = JSON.stringify(finals);
+      return new Response(json, {
+        headers: {
+          "content-type": "application/json; charset=UTF-8",
+        },
+      });
+    }
+    return new Response(null, { status: 404 });
+  });
 }
-
-console.log("Listening on http://localhost:8080");
-await listenAndServe(":8080", handleRequest);
