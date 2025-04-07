@@ -43,10 +43,10 @@ if (import.meta.main) {
       const url = new URL(request.url);
       const addon = url.searchParams.get('addon') ?? undefined;
       if (addon) {
-        logger.log(`has target addon -> ${addon}`, true);
+        logger.log(`has target addon -> ${addon}`);
       }
       else {
-        logger.log(`has no target addon -> scraping all addons`, true);
+        logger.log(`has no target addon -> scraping all addons`);
       }
       const result = await logic.run(addon);
       logger.log("main -> logic ended - returning response now");
@@ -62,10 +62,10 @@ if (import.meta.main) {
       const url = new URL(request.url);
       const addon = url.searchParams.get('addon') ?? undefined;
       if (addon) {
-        logger.log(`has target addon -> ${addon}`, true);
+        logger.log(`has target addon -> ${addon}`);
       }
       else {
-        logger.log(`has no target addon -> scraping all addons`, true);
+        logger.log(`has no target addon -> scraping all addons`);
       }
       const finals = await bql.run(addon);
       const json = JSON.stringify(finals);
