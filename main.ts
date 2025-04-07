@@ -41,14 +41,14 @@ if (import.meta.main) {
     if (method == "GET" && pathname.startsWith("/run")) {
       logger.log("main -> received request - starting logic now");
       const url = new URL(request.url);
-      const target = url.searchParams.get('target') ?? undefined;
-      if (target) {
-        logger.log(`has target addon -> ${target}`, true);
+      const addon = url.searchParams.get('addon') ?? undefined;
+      if (addon) {
+        logger.log(`has target addon -> ${addon}`, true);
       }
       else {
         logger.log(`has no target addon -> scraping all addons`, true);
       }
-      const result = await logic.run(target);
+      const result = await logic.run(addon);
       logger.log("main -> logic ended - returning response now");
       const json = JSON.stringify(result);
       return new Response(json, {
@@ -59,7 +59,15 @@ if (import.meta.main) {
     }
     if (method == "GET" && pathname.startsWith("/bql")) {
       logger.log("main -> received request - starting BQL logic now");
-      const finals = await bql.run();
+      const url = new URL(request.url);
+      const addon = url.searchParams.get('addon') ?? undefined;
+      if (addon) {
+        logger.log(`has target addon -> ${addon}`, true);
+      }
+      else {
+        logger.log(`has no target addon -> scraping all addons`, true);
+      }
+      const finals = await bql.run(addon);
       const json = JSON.stringify(finals);
       logger.log("main -> BQL logic ended - returning response now");
       return new Response(json, {

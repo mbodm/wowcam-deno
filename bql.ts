@@ -1,17 +1,23 @@
 import * as parser from "./parser.ts";
 import * as results from "./results.ts";
 
-export async function run(): Promise<results.LogicResult> {
-    const addons = [
-        "deadly-boss-mods",
-        "details",
-        "groupfinderflags",
-        "handynotes",
-        "handynotes-the-war-within",
-        "raiderio",
-        "tomtom",
-        "weakauras-2"
-    ];
+export async function run(addon?: string): Promise<results.LogicResult> {
+    let addons: string[] = [];
+    if (addon) {
+        addons = [addon];
+    }
+    else {
+        addons = [
+            "deadly-boss-mods",
+            "details",
+            "groupfinderflags",
+            "handynotes",
+            "handynotes-the-war-within",
+            "raiderio",
+            "tomtom",
+            "weakauras-2"
+        ];
+    }
     const finalObjects = [];
     for (const addon of addons) {
         const jsonString = await sendQuery(addon);

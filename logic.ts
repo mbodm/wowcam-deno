@@ -19,11 +19,14 @@ export async function run(addon?: string): Promise<results.LogicResult> {
     }
     else {
         addons = [
-            "raiderio",
+            "deadly-boss-mods",
             "details",
-            "tomtom",
-            "recount",
+            "groupfinderflags",
             "handynotes",
+            "handynotes-the-war-within",
+            "raiderio",
+            "tomtom",
+            "weakauras-2"
         ];
     }
     const finalObjects: object[] = [];
