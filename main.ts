@@ -43,10 +43,10 @@ if (import.meta.main) {
       const url = new URL(request.url);
       const target = url.searchParams.get('target') ?? undefined;
       if (target) {
-        logger.log(`has target addon -> ${target}`);
+        logger.log(`has target addon -> ${target}`, true);
       }
       else {
-        logger.log(`has no target addon -> scraping all addons`);
+        logger.log(`has no target addon -> scraping all addons`, true);
       }
       const result = await logic.run(target);
       logger.log("main -> logic ended - returning response now");
@@ -58,8 +58,10 @@ if (import.meta.main) {
       });
     }
     if (method == "GET" && pathname.startsWith("/bql")) {
-      const finals = await bql.sendQuery();
+      logger.log("main -> received request - starting BQL logic now");
+      const finals = await bql.run();
       const json = JSON.stringify(finals);
+      logger.log("main -> BQL logic ended - returning response now");
       return new Response(json, {
         headers: {
           "content-type": "application/json; charset=UTF-8",

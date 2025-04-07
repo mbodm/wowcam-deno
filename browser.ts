@@ -18,7 +18,7 @@ export async function init(): Promise<boolean> {
             return false;
         }
     }
-    logger.log('puppeteer initalized');
+    logger.log('puppeteer initalized', true);
     return true;
 }
 
@@ -33,7 +33,7 @@ export async function deinit(): Promise<boolean> {
             return false;
         }
     }
-    logger.log('puppeteer de-initalized');
+    logger.log('puppeteer de-initalized', true);
     return true;
 }
 
@@ -50,7 +50,7 @@ export async function getPage(): Promise<Page | null> {
         await page.setJavaScriptEnabled(true);
         await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         await page.setExtraHTTPHeaders({ 'Accept-Language': 'en' });
-        logger.log('new page created');
+        logger.log('new page created', true);
         return page;
     }
     catch (e: unknown) {

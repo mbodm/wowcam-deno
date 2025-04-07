@@ -1,11 +1,21 @@
-export function log(msg: string) {
+import * as platform from "./platform.ts";
 
-    const timestamp = new Date().toISOString();
-    console.log(`[MBODM ${timestamp}] ${msg}`);
+export function log(msg: string, skipOnDenoDeploy?: boolean) {
+    writeLogMessage(msg, '', skipOnDenoDeploy);
 }
 
-export function logError(msg: string) {
+export function logError(msg: string, skipOnDenoDeploy?: boolean) {
+    writeLogMessage(msg, 'Error: ', skipOnDenoDeploy);
+}
 
-    const timestamp = new Date().toISOString();
-    console.log(`[MBODM ${timestamp}] Error: ${msg}`);
+function writeLogMessage(msg: string, label: string, skipOnDenoDeploy?: boolean) {
+    if (skipOnDenoDeploy === undefined) {
+        skipOnDenoDeploy = false;
+    }
+    const isDenoDeploy = platform.isDenoDeploy();
+    if (isDenoDeploy && skipOnDenoDeploy) {
+        return;
+    }
+    const timestamp = isDenoDeploy ? '' : `[${new Date().toISOString()}] `; // Deno Deploy has its own timestamps
+    console.log(`${timestamp}${label}${msg}`);
 }

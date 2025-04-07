@@ -7,6 +7,6 @@ export async function getBrowser(): Promise<Browser> {
     //const endpoint: string = `wss://production-sfo.browserless.io/?token=${token}&proxy=residential&launch=${launchArgs}`;
     const endpoint: string = `wss://production-sfo.browserless.io/?token=${token}&proxy=residential`;
     const browser: Browser = await puppeteer.connect({ browserWSEndpoint: endpoint });
-    logger.log('using browserless.io service');
+    logger.log('using browserless.io service', true);
     return browser;
 }
