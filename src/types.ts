@@ -1,19 +1,21 @@
-export type TLogicResult = {
-    success: boolean,
-    lastRefresh: string,
-    scrapeResults: TScrapeResult[],
-    error: string
+export type TDatabaseConfigEntry = {
+    name: string, // <-- ID
+    addons: string[]
+}
+
+export type TDatabaseScrapeEntry = {
+    addonSlug: string, // <-- ID
+    scrapeResult: TScrapeResult
 }
 
 export type TScrapeResult = {
-    success: boolean,
     addonSlug: string,
     downloadUrl: string,
-    error: string
+    scraperApiSuccess: boolean,
+    scraperApiError: string
 }
 
-export type TDatabaseEntry = {
-    id: string,
-    scrapeResults: TScrapeResult[],
-    addOrUpdateTimestamp: string
+export type TScrapeResultWithoutDetails = {
+    addonSlug: string,
+    downloadUrl: string,
 }
