@@ -34,12 +34,12 @@ function stringifyObject(obj: unknown): string {
 }
 
 function createError(error: string, status: number): Response {
-    const json = stringifyObject({ success: false, result: null, error, status: createPrettyStatus(status) });
+    const json = stringifyObject({ success: false, lastRefresh: "", urls: [], error, status: createPrettyStatus(status) });
     return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" }, status });
 }
 
 function createSuccess(result: TLogicResult): Response {
-    const json = stringifyObject({ success: true, result, error: "", status: 200 });
+    const json = stringifyObject({ success: true, lastRefresh: result.lastRefresh, scrapeResults: result.scrapeResults, error: "", status: createPrettyStatus(200) });
     return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
 }
 
