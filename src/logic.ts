@@ -11,7 +11,7 @@ async function callScraperApi(addonSlug: string): Promise<TScrapeResult> {
     const url = `https://wowcam.mbodm.com/scrape?addon=${addonSlug}`;
     const response = await fetch(url);
     const obj = await response.json();
-    console.log("fetched slug: + addonSlug + " downloadUrl: " + );
+    console.log("fetched slug: + addonSlug + " downloadUrl: " + obj.downloadUrl);
     return { addonSlug, downloadUrl: obj.downloadUrl, successFromScraperApi: obj.success, errorFromScraperApi: obj.error };
 }
 
