@@ -103,6 +103,10 @@ function createPrettyStatus(status: number): string {
             return "HTTP 200 (OK)";
         case 400:
             return "HTTP 400 (Bad Request)";
+        case 403:
+            return "HTTP 403 (Forbidden)";
+        case 404:
+            return "HTTP 404 (Not Found)";
         case 500:
             return "HTTP 500 (Internal Server Error)";
         default:
