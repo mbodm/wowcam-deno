@@ -1,8 +1,7 @@
-import * as logic from "./logic.ts";
-import * as repo from "./repo.ts";
+import * as data from "./data.ts";
 
 export function serve() {
-    Deno.serve(async (request: Request) => {
+    Deno.serve((request: Request) => {
         const method = request.method;
         const url = new URL(request.url);
         const pathname = url.pathname;
@@ -11,32 +10,39 @@ export function serve() {
         }
         try {
             if (method === "GET" && pathname.startsWith("/configs/add")) {
-                const id = getIdFromQuery(url)
+                const id = getId(url)
                 if (!id) {
-                    return createError("Missing 'id' query param.", 400);
+                    return createMissingIdError();
                 }
-                const addons = getAddonsFromQuery(url);
+                const addons = getAddons(url);
                 if (!addons) {
-                    return createError("Missing 'addons' query param.", 400);
+                    return createMissingAddonsError();
                 }
-                repo.addConfig(id, addons);
+                const created = data.addOrUpdateConfig(id, addons);
+                return createSuccess(`Config successfully ${created ? "created" : "updated"}.`);
             }
-            if (method === "GET" && pathname === "/scrapes") {
-                const addons = getAddonsFromQuery(url);
-                if (!addons) {
-                    return createError("Missing 'addons' query param.", 400);
+            if (method === "GET" && pathname.startsWith("/configs")) {
+                if (!hasAdminToken(url)) {
+                    return createMissingTokenError();
                 }
-                const result = getDetailsFromQuery(url) ? repo.getScrapes() : repo.getScrapesWithoutDetails();
-                return createSuccess(result);
+                return createSuccess(data.getAllConfigs());
             }
-            if (method === "GET" && pathname === "/manual") {
-                const addons = getAddonsFromQuery(url);
-                if (!addons) {
-                    return createError("Missing 'addons' query param.", 400);
+            if (method === "GET" && pathname.startsWith("/scrapes/get")) {
+                const id = getId(url)
+                if (!id) {
+                    return createMissingIdError();
                 }
-                const withDetails = getDetailsFromQuery(url);
-                const result =  ? repo.getScrapesByAddonSlugs(addons, withDetails);
-                return createSuccess(result);
+                const results = data.getScrapesByConfigName(id);
+                if (!results) {
+                    return createConfigNotExistsError();
+                }
+                return createSuccess(results);
+            }
+            if (method === "GET" && pathname.startsWith("/scrapes")) {
+                if (!hasAdminToken(url)) {
+                    return createMissingTokenError();
+                }
+                return createSuccess(data.getAllScrapes());
             }
         }
         catch (e: unknown) {
@@ -50,25 +56,35 @@ export function serve() {
     });
 }
 
-function getIdFromQuery(url: URL): string | null {
-    const id = url.searchParams.get("id");
-    if (!id) {
-        return null;
-    }
-    return id;
+function getId(url: URL): string | null {
+    return url.searchParams.get("id");
 }
 
-function getAddonsFromQuery(url: URL): string[] | null {
+function getAddons(url: URL): string[] | null {
     const addons = url.searchParams.get("addons");
-    if (!addons) {
-        return null;
-    }
-    return addons.split(",").map(addon => addon.trim()).filter(addon => addon);
+    return addons ? addons.split(",").map(addon => addon.trim()).filter(addon => addon) : null;
 }
 
-function getDetailsFromQuery(url: URL): boolean {
-    const id = url.searchParams.get("details");
-    return id === "true";
+function hasAdminToken(url: URL): boolean {
+    // This should (of course) not replace real security (it shall just act as some small barrier)
+    // It's fine (wether we have any data to secure nor we use real REST API concepts here anyway)
+    return url.searchParams.get("token") === "###MBODM###ADMIN###d19f023f-bfe0-437a-9daf-7ef28386ebe2###";
+}
+
+function createMissingIdError() {
+    return createError("Missing 'id' query param.", 400);
+}
+
+function createMissingAddonsError() {
+    return createError("Missing 'addons' query param.", 400);
+}
+
+function createMissingTokenError() {
+    return createError("Access denied.", 403);
+}
+
+function createConfigNotExistsError() {
+    return createError("Config with given ID not exists.", 404);
 }
 
 function createError(error: string, status: number): Response {

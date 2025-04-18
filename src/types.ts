@@ -1,6 +1,6 @@
 export type TDatabaseConfigEntry = {
-    name: string, // <-- ID
-    addons: string[]
+    configName: string, // <-- ID
+    addonSlugs: string[]
 }
 
 export type TDatabaseScrapeEntry = {
@@ -11,11 +11,6 @@ export type TDatabaseScrapeEntry = {
 export type TScrapeResult = {
     addonSlug: string,
     downloadUrl: string,
-    scraperApiSuccess: boolean,
-    scraperApiError: string
-}
-
-export type TScrapeResultWithoutDetails = {
-    addonSlug: string,
-    downloadUrl: string,
+    successFromScraperApi: boolean,
+    errorFromScraperApi: string
 }
