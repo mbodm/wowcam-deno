@@ -68,7 +68,9 @@ function getAddons(url: URL): string[] | null {
 function hasAdminToken(url: URL): boolean {
     // This should (of course) not replace real security (it shall just act as some small barrier)
     // It's fine (wether we have any data to secure nor we use real REST API concepts here anyway)
-    return url.searchParams.get("token") === "###MBODM###ADMIN###d19f023f-bfe0-437a-9daf-7ef28386ebe2###";
+    const token = url.searchParams.get("token");
+    console.log(token);
+    return token === "###MBODM###ADMIN###d19f023f-bfe0-437a-9daf-7ef28386ebe2###";
 }
 
 function createMissingIdError() {
