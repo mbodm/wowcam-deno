@@ -7,6 +7,7 @@ export async function update(): Promise<void> {
     let counter = 0;
     for (const entry of getAllScrapes()) {
         entry.scrapeResult = await callScraperApi(entry.addonSlug);
+        console.log(entry.scrapeResult.downloadUrl);
         counter++;
     };
     const word = pluralizeWhenNecessary('addon', counter);
