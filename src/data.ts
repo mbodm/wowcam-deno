@@ -1,4 +1,5 @@
 import { TDatabaseConfigEntry, TDatabaseScrapeEntry, TScrapeResult } from "./types.ts";
+import { log } from "./helper.ts";
 
 const configs: TDatabaseConfigEntry[] = [];
 const scrapes: TDatabaseScrapeEntry[] = [];
@@ -21,6 +22,7 @@ export function addOrUpdateConfig(configName: string, addonSlugs: string[]): boo
         const entry = { configName, addonSlugs };
         configs.push(entry);
         addToScrapesIfNotExists(addonSlugs);
+        log(`A new config was added ('${configName}').`, true);
         return true;
     }
     else {
@@ -77,18 +79,20 @@ export function getAllScrapes(): TDatabaseScrapeEntry[] {
 
 // Relational
 
-export function getScrapesByConfigName(configName: string): TScrapeResult[] | null {
+export function getScrapeResultsByConfigName(configName: string): TScrapeResult[] | null {
     idEmptyCheck(configName, "configName");
-    const config = getConfig(configName)
+    const config = getConfig(configName);
     if (!config) {
         return null;
     }
-    return getAllScrapes().filter(e => config.addonSlugs.includes(e.addonSlug)).map(e => e.scrapeResult);
+    return getAllScrapes().
+        filter(e => config.addonSlugs.includes(e.addonSlug)).
+        map(e => createSimpleScrapeResult(e.scrapeResult.addonSlug, e.scrapeResult.downloadUrl));
 }
 
 // Internal
 
-function idEmptyCheck(idValue: string, idName: string) {
+function idEmptyCheck(idValue: string, idName: string): void {
     if (idValue === "") {
         throw new Error(`The given '${idName}' argument (used as ID/PrimaryKey) was an empty string.`);
     }
@@ -97,10 +101,14 @@ function idEmptyCheck(idValue: string, idName: string) {
     }
 }
 
-function addToScrapesIfNotExists(addonSlugs: string[]) {
+function addToScrapesIfNotExists(addonSlugs: string[]): void {
     for (const addonSlug of addonSlugs) {
         if (!scrapeExists(addonSlug)) {
             addOrUpdateScrape(addonSlug, { addonSlug, downloadUrl: "", successFromScraperApi: false, errorFromScraperApi: "" });
         }
     }
+}
+
+function createSimpleScrapeResult(addonSlug: string, downloadUrl: string): TScrapeResult {
+    return { addonSlug, downloadUrl };
 }

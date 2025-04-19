@@ -1,4 +1,6 @@
 import * as data from "./data.ts";
+import { log } from "./helper.ts";
+import { TServerSuccessInput, TServerResult } from "./types.ts";
 
 export function serve() {
     Deno.serve((request: Request) => {
@@ -10,7 +12,7 @@ export function serve() {
         }
         try {
             if (method === "GET" && pathname.startsWith("/configs/add")) {
-                const id = getId(url)
+                const id = getId(url);
                 if (!id) {
                     return createMissingIdError();
                 }
@@ -19,35 +21,37 @@ export function serve() {
                     return createMissingAddonsError();
                 }
                 const created = data.addOrUpdateConfig(id, addons);
-                return createSuccess(`Config successfully ${created ? "created" : "updated"}.`);
+                return createSuccess({ message: `Config successfully ${created ? "created" : "updated"}.` });
             }
-            if (method === "GET" && pathname.startsWith("/configs")) {
+            if (method === "GET" && pathname.startsWith("/configs/all")) {
                 if (!hasAdminToken(url)) {
                     return createMissingTokenError();
                 }
-                return createSuccess(data.getAllConfigs());
+                log("The admin token was used to show all configs.", true);
+                return createSuccess({ configs: data.getAllConfigs() });
             }
             if (method === "GET" && pathname.startsWith("/scrapes/get")) {
-                const id = getId(url)
+                const id = getId(url);
                 if (!id) {
                     return createMissingIdError();
                 }
-                const results = data.getScrapesByConfigName(id);
+                const results = data.getScrapeResultsByConfigName(id);
                 if (!results) {
                     return createConfigNotExistsError();
                 }
-                return createSuccess(results);
+                return createSuccess({ results });
             }
-            if (method === "GET" && pathname.startsWith("/scrapes")) {
+            if (method === "GET" && pathname.startsWith("/scrapes/all")) {
                 if (!hasAdminToken(url)) {
                     return createMissingTokenError();
                 }
-                return createSuccess(data.getAllScrapes());
+                log("The admin token was used to show all scrapes.", true);
+                return createSuccess({ scrapes: data.getAllScrapes() });
             }
         }
         catch (e: unknown) {
             if (e instanceof Error) {
-                console.log(e.message);
+                console.error(e.message);
                 return createError("Internal server exception occurred (please check logs).", 500);
             }
             return createError("Internal server exception occurred.", 500);
@@ -71,30 +75,32 @@ function hasAdminToken(url: URL): boolean {
     return url.searchParams.get("token") === "d19f023f-bfe0-437a-9daf-7ef28386ebe2";
 }
 
-function createMissingIdError() {
+function createMissingIdError(): Response {
     return createError("Missing 'id' query param.", 400);
 }
 
-function createMissingAddonsError() {
+function createMissingAddonsError(): Response {
     return createError("Missing 'addons' query param.", 400);
 }
 
-function createMissingTokenError() {
+function createMissingTokenError(): Response {
     return createError("Access denied.", 403);
 }
 
-function createConfigNotExistsError() {
+function createConfigNotExistsError(): Response {
     return createError("Config with given ID not exists.", 404);
 }
 
-function createError(error: string, status: number): Response {
-    const json = JSON.stringify({ success: false, result: null, error, status: createPrettyStatus(status) }, null, 4);
-    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" }, status });
+function createSuccess({ message, configs, results, scrapes }: TServerSuccessInput): Response {
+    const serverResult: TServerResult = { success: true, message, configs, results, scrapes, error: "", status: createPrettyStatus(200) };
+    const json = JSON.stringify(serverResult, null, 4);
+    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
 }
 
-function createSuccess(result: unknown): Response {
-    const json = JSON.stringify({ success: true, result, error: "", status: createPrettyStatus(200) }, null, 4);
-    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
+function createError(error: string, status: number): Response {
+    const serverResult: TServerResult = { success: false, error, status: createPrettyStatus(status) };
+    const json = JSON.stringify(serverResult, null, 4);
+    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" }, status });
 }
 
 function createPrettyStatus(status: number): string {
