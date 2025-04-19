@@ -13,7 +13,7 @@ export async function update(): Promise<void> {
         console.log(entry);
         entry.scrapeResult = scrapeResult;
         console.log("array entry after assign:");
-        console.log(entry);
+        console.log(getAllScrapes()[0]);
         counter++;
     };
     const word = pluralizeWhenNecessary('addon', counter);
