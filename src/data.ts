@@ -2,7 +2,7 @@ import { TDatabaseConfigEntry, TDatabaseScrapeEntry, TScrapeResult } from "./typ
 import { log } from "./helper.ts";
 
 const configs: TDatabaseConfigEntry[] = [];
-let scrapes: TDatabaseScrapeEntry[] = [];
+const scrapes: TDatabaseScrapeEntry[] = [];
 
 // Configs
 
