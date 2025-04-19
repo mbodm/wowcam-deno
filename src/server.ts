@@ -46,7 +46,9 @@ export function serve() {
                     return createMissingTokenError();
                 }
                 log("The admin token was used to show all scrapes.", true);
-                return createSuccess({ scrapes: data.getAllScrapes() });
+                const scrapes = data.getAllScrapes();
+                console.log(scrapes);
+                return createSuccess({ scrapes });
             }
         }
         catch (e: unknown) {
