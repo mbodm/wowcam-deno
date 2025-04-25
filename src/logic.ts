@@ -18,5 +18,13 @@ async function callScraperApi(addonSlug: string): Promise<TScrapeResult> {
     const url = `https://wowcam.mbodm.com/scrape?addon=${addonSlug}`;
     const response = await fetch(url);
     const obj = await response.json();
-    return { addonSlug, downloadUrl: obj.result.downloadUrl, successFromScraperApi: obj.success, errorFromScraperApi: obj.error };
+    if (!obj) {
+        throw new Error("Response from scraper API was an undefined object.");
+    }
+    if (!obj.result) {
+        throw new Error("Response from scraper API contained an undefinded object as 'result' property.");
+    }
+    const downloadUrl = obj.result.downloadUrl ?? "";
+    const error = obj.error ?? "";
+    return { addonSlug, downloadUrl, successFromScraperApi: obj.success, errorFromScraperApi: error };
 }
