@@ -4,6 +4,6 @@ import { serve } from "./server.ts";
 
 if (import.meta.main) {
   addOrUpdateConfig("9ccb0654-508d-4882-9983-4a7dd35e2243", ["tomtom"]); // To have something in DB
-  Deno.cron("Scrape Curse", "*/1 * * * *", async () => await update());
+  Deno.cron("Scrape Curse", "*/1 * * * *", () => update().then(() => console.log("CRON job finished and scrapes updated.")));
   serve();
 }
