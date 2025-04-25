@@ -1,9 +1,10 @@
 import * as data from "./data.ts";
 import { log } from "./helper.ts";
+import { update } from "./logic.ts";
 import { TServerSuccessInput, TServerResult } from "./types.ts";
 
 export function serve() {
-    Deno.serve((request: Request) => {
+    Deno.serve(async (request: Request) => {
         const method = request.method;
         const url = new URL(request.url);
         const pathname = url.pathname;
@@ -30,7 +31,7 @@ export function serve() {
                 log("The admin token was used to show all configs.", true);
                 return createSuccess({ configs: data.getAllConfigs() });
             }
-            if (method === "GET" && pathname.startsWith("/scrapes/get")) {
+            if (method === "GET" && pathname.startsWith("/wowcam/get")) {
                 const id = getId(url);
                 if (!id) {
                     return createMissingIdError();
@@ -46,6 +47,15 @@ export function serve() {
                     return createMissingTokenError();
                 }
                 log("The admin token was used to show all scrapes.", true);
+                const scrapes = data.getAllScrapes();
+                return createSuccess({ scrapes });
+            }
+            if (method === "GET" && pathname.startsWith("/scrapes/update")) {
+                if (!hasAdminToken(url)) {
+                    return createMissingTokenError();
+                }
+                log("The admin token was used to update all scrapes.", true);
+                await update();
                 const scrapes = data.getAllScrapes();
                 return createSuccess({ scrapes });
             }
