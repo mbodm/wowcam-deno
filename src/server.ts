@@ -47,7 +47,6 @@ export function serve() {
                 }
                 log("The admin token was used to show all scrapes.", true);
                 const scrapes = data.getAllScrapes();
-                console.log(scrapes);
                 return createSuccess({ scrapes });
             }
         }
