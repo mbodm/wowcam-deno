@@ -11,7 +11,7 @@ export async function update(): Promise<void> {
         counter++;
     };
     const word = pluralizeWhenNecessary('addon', counter);
-    log(`Scraped ${counter} ${word}.`);
+    log(`Scraped ${counter} ${word}.`, true);
 }
 
 async function callScraperApi(addonSlug: string): Promise<TScrapeResult> {
