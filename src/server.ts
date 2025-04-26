@@ -48,6 +48,8 @@ export function serve() {
                 }
                 log("The admin token was used to show all scrapes.", true);
                 const scrapes = data.getAllScrapes();
+                console.log("i am the server and received request. here are the scrapes:");
+                console.log(scrapes);
                 return createSuccess({ scrapes });
             }
             if (method === "GET" && pathname.startsWith("/scrapes/update")) {
@@ -57,8 +59,6 @@ export function serve() {
                 log("The admin token was used to update all scrapes.", true);
                 await update();
                 const scrapes = data.getAllScrapes();
-                console.log("i am the server and received request. here are the scrapes:");
-                console.log(scrapes);
                 return createSuccess({ scrapes });
             }
         }
