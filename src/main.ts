@@ -1,4 +1,5 @@
-import { addOrUpdateConfig } from "./data.ts";
+import { addOrUpdateConfig, getAllScrapes } from "./data.ts";
+import { update } from "./logic.ts";
 //import { update } from "./logic.ts";
 import { serve } from "./server.ts";
 
@@ -11,13 +12,18 @@ if (import.meta.main) {
 
     //update().then(() => console.log("CRON job finished and scrapes updated."));
 
+
+    await update();
+    const scrapes = getAllScrapes();
+    console.log(scrapes);
+
     // Try it, by calling the endpoint from the "outside" (since this works in browser):
-    
-    const updateUrl = "https://mbodm-wowcam.deno.dev/scrapes/update?token=d19f023f-bfe0-437a-9daf-7ef28386ebe2";
-    const response = await fetch(updateUrl);
-    console.log("CRON job finished and scrapes updated.");
-    const text = await response.text();
-    console.log(text);
+
+    // const updateUrl = "https://mbodm-wowcam.deno.dev/scrapes/update?token=d19f023f-bfe0-437a-9daf-7ef28386ebe2";
+    // const response = await fetch(updateUrl);
+    // console.log("CRON job finished and scrapes updated.");
+    // const text = await response.text();
+    // console.log(text);
 
     // const response = await fetch("http://google.com");
     // const html = await response.text();
