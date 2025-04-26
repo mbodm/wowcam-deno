@@ -74,7 +74,7 @@ export function getScrape(addonSlug: string): TDatabaseScrapeEntry | null {
 }
 
 export function getAllScrapes(): TDatabaseScrapeEntry[] {
-    console.log("getAllScrapes() called");
+    console.log("getAllScrapes() called in data module. here are the scrapes:");
     console.log(scrapes);
     return scrapes;
 }

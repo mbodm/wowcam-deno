@@ -57,6 +57,8 @@ export function serve() {
                 log("The admin token was used to update all scrapes.", true);
                 await update();
                 const scrapes = data.getAllScrapes();
+                console.log("i am the server and received request. here are the scrapes:");
+                console.log(scrapes);
                 return createSuccess({ scrapes });
             }
         }

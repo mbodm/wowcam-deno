@@ -15,6 +15,7 @@ if (import.meta.main) {
 
     await update();
     const scrapes = getAllScrapes();
+    console.log("----- i am from CRON. here are the scrapes:");
     console.log(scrapes);
 
     // Try it, by calling the endpoint from the "outside" (since this works in browser):
