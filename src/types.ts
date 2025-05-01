@@ -1,9 +1,14 @@
-export type TDatabaseConfigEntry = {
+export type ConfigEntry = {
     configName: string, // <-- ID
     addonSlugs: string[]
 }
 
-export type TDatabaseScrapeEntry = {
+export enum ConfigOperationType {
+    Create,
+    Update
+}
+
+export type ScrapeEntry = {
     addonSlug: string, // <-- ID
     scrapeResult: TScrapeResult
 }
@@ -17,9 +22,11 @@ export type TScrapeResult = {
 
 export type TServerSuccessInput = {
     message?: string,
-    configs?: TDatabaseConfigEntry[],
+    configs?: ConfigEntry[],
     results?: TScrapeResult[],
-    scrapes?: TDatabaseScrapeEntry[]
+    scrapes?: ScrapeEntry[],
+    slugs?: string[],
+    allSlugs?: string[]
 }
 
 export type TServerResult = {

@@ -1,15 +1,18 @@
-import { TDatabaseConfigEntry, TDatabaseScrapeEntry, TScrapeResult } from "./types.ts";
+import { ConfigEntry, ScrapeEntry, TScrapeResult } from "./types.ts";
 import { log } from "./helper.ts";
 
-const configs: TDatabaseConfigEntry[] = [];
-const scrapes: TDatabaseScrapeEntry[] = [];
+const configs: ConfigEntry[] = [];
+const scrapes: ScrapeEntry[] = [];
 
 // Configs
 
+
+/*
 export function configExists(configName: string): boolean {
     idEmptyCheck(configName, "configName");
     return configs.some(e => e.configName === configName);
 }
+    */
 
 export function addOrUpdateConfig(configName: string, addonSlugs: string[]): boolean {
     idEmptyCheck(configName, "configName");
@@ -32,13 +35,13 @@ export function addOrUpdateConfig(configName: string, addonSlugs: string[]): boo
     }
 }
 
-export function getConfig(configName: string): TDatabaseConfigEntry | null {
+export function getConfig(configName: string): ConfigEntry | null {
     idEmptyCheck(configName, "configName");
     const index = configs.findIndex(e => e.configName === configName);
     return index === -1 ? null : configs[index];
 }
 
-export function getAllConfigs(): TDatabaseConfigEntry[] {
+export function getAllConfigs(): ConfigEntry[] {
     return configs;
 }
 
@@ -49,7 +52,7 @@ export function scrapeExists(addonSlug: string): boolean {
     return scrapes.some(e => e.addonSlug === addonSlug);
 }
 
-export function addOrUpdateScrape(addonSlug: string, scrapeResult: TScrapeResult): TDatabaseScrapeEntry {
+export function addOrUpdateScrape(addonSlug: string, scrapeResult: TScrapeResult): ScrapeEntry {
     idEmptyCheck(addonSlug, "addonSlug");
     const index = scrapes.findIndex(e => e.addonSlug === addonSlug);
     if (index === -1) {
@@ -67,13 +70,13 @@ export function addOrUpdateScrape(addonSlug: string, scrapeResult: TScrapeResult
     }
 }
 
-export function getScrape(addonSlug: string): TDatabaseScrapeEntry | null {
+export function getScrape(addonSlug: string): ScrapeEntry | null {
     idEmptyCheck(addonSlug, "addonSlug");
     const index = scrapes.findIndex(e => e.addonSlug === addonSlug);
     return index === -1 ? null : scrapes[index];
 }
 
-export function getAllScrapes(): TDatabaseScrapeEntry[] {
+export function getAllScrapes(): ScrapeEntry[] {
     console.log("getAllScrapes() called in data module. here are the scrapes:");
     console.log(scrapes);
     return scrapes;

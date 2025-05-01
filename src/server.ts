@@ -1,7 +1,8 @@
 import * as data from "./data.ts";
+import * as configs from "./configs.ts";
 import { log } from "./helper.ts";
-import { update } from "./logic.ts";
-import { TServerSuccessInput, TServerResult } from "./types.ts";
+//import { update } from "./logic.ts";
+import { TServerSuccessInput, TServerResult, ScrapeEntry, ConfigOperationType } from "./types.ts";
 
 export function serve() {
     Deno.serve(async (request: Request) => {
@@ -21,15 +22,29 @@ export function serve() {
                 if (!addons) {
                     return createMissingAddonsError();
                 }
-                const created = data.addOrUpdateConfig(id, addons);
-                return createSuccess({ message: `Config successfully ${created ? "created" : "updated"}.` });
+                const result = await configs.createOrUpdate(id, addons);
+                const msg = result === ConfigOperationType.Create ? "created" : "updated";
+                return createSuccess({ message: `Config successfully ${msg}.` });
+            }
+            if (method === "GET" && pathname.startsWith("/configs/one")) {
+                if (!hasAdminToken(url)) {
+                    return createMissingTokenError();
+                }
+                log("The admin token was used to show all configs.", true);
+                const id = getId(url);
+                if (!id) {
+                    return createMissingIdError();
+                }
+                const entry = await configs.getOne(id);
+                return createSuccess({ configs: [entry] });
             }
             if (method === "GET" && pathname.startsWith("/configs/all")) {
                 if (!hasAdminToken(url)) {
                     return createMissingTokenError();
                 }
                 log("The admin token was used to show all configs.", true);
-                return createSuccess({ configs: data.getAllConfigs() });
+                const entries = await configs.getAll();
+                return createSuccess({ configs: entries });
             }
             if (method === "GET" && pathname.startsWith("/wowcam/get")) {
                 const id = getId(url);
@@ -57,8 +72,12 @@ export function serve() {
                     return createMissingTokenError();
                 }
                 log("The admin token was used to update all scrapes.", true);
-                await update();
-                const scrapes = data.getAllScrapes();
+                //await update();
+                //const scrapes = data.getAllScrapes();
+
+
+
+                const scrapes: ScrapeEntry[] = [];
                 return createSuccess({ scrapes });
             }
         }
@@ -104,8 +123,8 @@ function createConfigNotExistsError(): Response {
     return createError("Config with given ID not exists.", 404);
 }
 
-function createSuccess({ message, configs, results, scrapes }: TServerSuccessInput): Response {
-    const serverResult: TServerResult = { success: true, message, configs, results, scrapes, error: "", status: createPrettyStatus(200) };
+function createSuccess({ message, configs, results, scrapes, slugs, allSlugs }: TServerSuccessInput): Response {
+    const serverResult: TServerResult = { success: true, message, configs, results, scrapes, slugs, allSlugs, error: "", status: createPrettyStatus(200) };
     const json = JSON.stringify(serverResult, null, 4);
     return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
 }
