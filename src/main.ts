@@ -5,7 +5,7 @@ import * as helper from "./core/helper.ts";
 
 if (import.meta.main) {
   await addDefaultConfig();
-  Deno.cron("CronJob1", "*/1 * * * *", async () => {
+  Deno.cron("CronJob1", "*/30 * * * *", async () => {
     if (Deno.env.get("STOP") === "1") {
       return;
     }
