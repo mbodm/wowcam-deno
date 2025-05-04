@@ -1,14 +1,18 @@
-import { addOrUpdateConfig, getAllScrapes } from "./data.ts";
-import { update } from "./logic.ts";
-//import { update } from "./logic.ts";
-import { serve } from "./server.ts";
+import * as dbconfigs from "./db/configs.ts";
+import * as logic from "./core/logic.ts";
+import * as server from "./api/server.ts";
+import * as helper from "./core/helper.ts";
 
 if (import.meta.main) {
-  addOrUpdateConfig("9ccb0654-508d-4882-9983-4a7dd35e2243", ["tomtom"]); // To have something in DB
+  const defaultConfigName = "9ccb0654-508d-4882-9983-4a7dd35e2243";
+  dbconfigs.createOrUpdate(defaultConfigName, ["tomtom"]); // To have something in DB
+  helper.log(`Created default '${defaultConfigName}' config.`);
   Deno.cron("CronJob1", "*/1 * * * *", async () => {
     if (Deno.env.get("STOP") === "1") {
       return;
     }
+    await logic.refreshScrapes();
   });
-  serve();
+  server.serve();
+  helper.log("Started Deno API server.");
 }
