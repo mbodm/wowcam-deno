@@ -32,16 +32,19 @@ export async function configsOne(url: URL): Promise<Response> {
         const scrapes = await logic.getScrapeResultsByConfigName(id);
         return createSuccess({ entry, scrapes });
     }
+    helper.log(`Single config '${id}' requested.`);
     return createSuccess({ entry });
 }
 
 export async function configsAll(): Promise<Response> {
     const entries = await dbconfigs.getAll();
+    helper.log("All configs requested.");
     return createSuccess({ entries });
 }
 
 export async function scrapesAll(): Promise<Response> {
     const entries = await dbscrapes.getAll();
+    helper.log("All scrapes requested.");
     return createSuccess({ entries });
 }
 
@@ -49,6 +52,7 @@ export async function scrapesRefresh(): Promise<Response> {
     const count = await logic.refreshScrapes();
     const term = helper.pluralizeWhenNecessary(count, 'addon');
     const msg = `Refreshed ${count} ${term}.`;
+    helper.log("Refresh of all scrapes manually triggered.");
     return createSuccess({ msg });
 }
 
