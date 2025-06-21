@@ -36,7 +36,7 @@ export async function addToScrapesIfNotExisting(addonSlugs: string[]) {
 }
 
 async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
-    const url = `https://wowcam.mbodm.com/scrape?addon=${addonSlug}`;
+    const url = `https://wowcam-puppeteer.mbodm.com/scrape?addon=${addonSlug}`;
     const response = await fetch(url);
     const obj = await response.json();
     if (!obj) {
