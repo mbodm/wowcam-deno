@@ -16,6 +16,7 @@ export enum OperationType {
 export type ScrapeResult = {
     addonSlug: string,
     downloadUrl: string,
+    downloadUrlAfterAllRedirects: string,
     successFromScraperApi?: boolean,
     errorFromScraperApi?: string
 }
