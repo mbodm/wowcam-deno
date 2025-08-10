@@ -1,9 +1,9 @@
-export function isDenoDeploy(): boolean {
+export function isDenoDeployPlatform(): boolean {
     return Deno.env.get("DENO_DEPLOYMENT_ID") !== undefined;
 }
 
 export function log(msg: string): void {
-    if (isDenoDeploy()) {
+    if (isDenoDeployPlatform()) {
         console.log(msg);
     }
     else {

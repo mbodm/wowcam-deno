@@ -1,7 +1,5 @@
 import { AddonData, ScrapeResult } from "../core/types.ts";
 
-
-
 export async function exists(addonSlug: string): Promise<boolean> {
     idEmptyCheck(addonSlug);
     const kv = await Deno.openKv();

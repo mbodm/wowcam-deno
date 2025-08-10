@@ -6,7 +6,7 @@ import * as logic from "../core/scrape.ts";
 import * as helper from "../core/helper.ts";
 
 export async function add(url: URL): Promise<Response> {
-    helper.log("Client wants to add 1 or more addons.");
+    helper.log("Received request to add 1 or more addons.");
     const addons = params.getAddonsFromUrl(url);
     if (!addons) {
         return errors.missingAddonsError();
@@ -24,12 +24,12 @@ export async function add(url: URL): Promise<Response> {
     const msg = `Added ${counter} new ${term}.`;
     helper.log(msg);
 
-    
-    return createResponse(msg, addons);
+
+    return createResponse(msg, []);
 }
 
 export async function get(): Promise<Response> {
-    helper.log("Client requested reading of all addons.");
+    helper.log("Received request to read all addons.");
     const addons = await db.getAll();
     const count = addons.length;
     const term = helper.pluralizeWhenNecessary(count, "addon");
@@ -37,7 +37,7 @@ export async function get(): Promise<Response> {
 }
 
 export async function scrape(): Promise<Response> {
-    helper.log("Client requested scraping of all addons.");
+    helper.log("Received request to immediately scrape all addons.");
     await logic.scrapeAll();
     const addons = await db.getAll();
     const count = addons.length;
@@ -46,7 +46,7 @@ export async function scrape(): Promise<Response> {
 }
 
 export async function clear(): Promise<Response> {
-    helper.log("Client requested clearing of all Deno KV storages.");
+    helper.log("Received request to clear all Deno KV storages.");
     await db.deleteAll();
     return createResponse("Cleared all Deno KV storages.", []);
 }
