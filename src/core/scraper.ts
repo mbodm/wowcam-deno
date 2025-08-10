@@ -1,17 +1,17 @@
 import { ScrapeResult } from "./types.ts";
-import * as data from "../data/addons.ts";
+import * as storage from "./storage.ts";
 import * as helper from "./helper.ts";
 
-export async function scrapeAll(): Promise<number> {
+export async function all(): Promise<number> {
     let counter = 0;
-    const addons = await data.getAll();
-    for (const addon of addons) {
-        const scrapeResult = await callScraperApi(addon.addonSlug);
-        data.update(addon.addonSlug, scrapeResult);
+    const entries = await storage.getAll();
+    for (const entry of entries) {
+        const scrapeResult = await callScraperApi(entry.addonSlug);
+        storage.update(entry.addonSlug, scrapeResult);
         counter++;
     };
-    const addonOrAddons = helper.pluralizeWhenNecessary(counter, 'addon');
-    helper.log(`Scraped ${counter} ${addonOrAddons}.`);
+    const term = helper.pluralizeWhenNecessary(counter, 'addon');
+    helper.log(`Scraped ${counter} ${term}.`);
     return counter;
 }
 
@@ -29,7 +29,7 @@ async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
         addonSlug,
         downloadUrl: obj.result.downloadUrl ?? "",
         downloadUrlFinal: obj.result.downloadUrlFinal ?? "",
-        successFromScraperApi: obj.success ?? false,
-        errorFromScraperApi: obj.error ?? ""
+        scraperApiSuccess: obj.success ?? false,
+        scraperApiError: obj.error ?? ""
     };
 }

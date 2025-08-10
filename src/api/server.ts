@@ -7,7 +7,7 @@ export function start() {
     Deno.serve(async (request: Request) => {
         const method = request.method;
         if (method !== "GET") {
-            return errors.methodNotAllowed();
+            return errors.methodNotAllowedError();
         }
         const url = new URL(request.url);
         const path = url.pathname;
@@ -22,16 +22,16 @@ export function start() {
         }
         try {
             if (path.startsWith("/add")) {
-                await routes.add(url);
+                return await routes.add(url);
             }
             if (path.startsWith("/get")) {
-                await routes.get();
+                return await routes.get();
             }
             if (path.startsWith("/scrape")) {
-                await routes.scrape();
+                return await routes.scrape();
             }
             if (path.startsWith("/clear")) {
-                await routes.clear();
+                return await routes.clear();
             }
         }
         catch (e: unknown) {

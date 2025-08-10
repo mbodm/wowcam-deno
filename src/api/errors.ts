@@ -1,12 +1,8 @@
 import { ServerResult } from "../core/types.ts";
 import * as helper from "../core/helper.ts";
 
-export function methodNotAllowed(): Response {
+export function methodNotAllowedError(): Response {
     return createResponse("HTTP method not allowed.", 405);
-}
-
-export function missingIdError(): Response {
-    return createResponse("Missing 'id' query param.", 400);
 }
 
 export function missingAddonsError(): Response {

@@ -1,15 +1,15 @@
-export type AddonData = {
+export type AddonEntry = {
     addonSlug: string; // <-- Deno KV key/ID
-    scrapeDone: boolean;
-    scrapeResult: ScrapeResult | null;
+    scrapePassed: boolean;
+    scrapeResult: ScrapeResult;
 }
 
 export type ScrapeResult = {
     addonSlug: string,
     downloadUrl: string,
     downloadUrlFinal: string,
-    successFromScraperApi: boolean,
-    errorFromScraperApi: string
+    scraperApiSuccess: boolean,
+    scraperApiError: string
 }
 
 export type ServerResult = {
@@ -17,5 +17,5 @@ export type ServerResult = {
     error: string,
     status: string,
     msg?: string,
-    addons?: AddonData[],
+    entries?: AddonEntry[],
 }
