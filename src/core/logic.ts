@@ -21,7 +21,7 @@ export async function getScrapeResultsByConfigName(configName: string): Promise<
     const scrapes = await dbscrapes.getAll();
     const scrapesOfConfig: ScrapeEntry[] = scrapes.filter(scrape => config.addonSlugs.includes(scrape.addonSlug));
     const scrapeResults: ScrapeResult[] = scrapesOfConfig.map(scrape =>
-        createSimpleScrapeResult(scrape.addonSlug, scrape.scrapeResult.downloadUrl, scrape.scrapeResult.downloadUrlAfterAllRedirects));
+        createSimpleScrapeResult(scrape.addonSlug, scrape.scrapeResult.downloadUrl, scrape.scrapeResult.downloadUrlFinal));
     return scrapeResults;
 }
 
@@ -30,7 +30,7 @@ export async function addToScrapesIfNotExisting(addonSlugs: string[]) {
     const knownAddons = allScrapes.map(scrape => scrape.addonSlug);
     addonSlugs.forEach(addonSlug => {
         if (!knownAddons.includes(addonSlug)) {
-            dbscrapes.createOrUpdate(addonSlug, { addonSlug, downloadUrl: "", downloadUrlAfterAllRedirects: "" });
+            dbscrapes.createOrUpdate(addonSlug, { addonSlug, downloadUrl: "", downloadUrlFinal: "" });
             helper.log(`Added '${addonSlug}' to scrapes.`);
         }
     });
@@ -47,12 +47,12 @@ async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
         throw new Error("Response from scraper API contained an undefinded object as 'result' property.");
     }
     const downloadUrl = obj.result.downloadUrl ?? "";
-    const downloadUrlAfterAllRedirects = obj.result.downloadUrlAfterAllRedirects ?? "";
+    const downloadUrlFinal = obj.result.downloadUrlFinal ?? "";
     const success = obj.success ?? false;
     const error = obj.error ?? "";
-    return { addonSlug, downloadUrl, downloadUrlAfterAllRedirects, successFromScraperApi: success, errorFromScraperApi: error };
+    return { addonSlug, downloadUrl, downloadUrlFinal, successFromScraperApi: success, errorFromScraperApi: error };
 }
 
-function createSimpleScrapeResult(addonSlug: string, downloadUrl: string, downloadUrlAfterAllRedirects: string): ScrapeResult {
-    return { addonSlug, downloadUrl, downloadUrlAfterAllRedirects };
+function createSimpleScrapeResult(addonSlug: string, downloadUrl: string, downloadUrlFinal: string): ScrapeResult {
+    return { addonSlug, downloadUrl, downloadUrlFinal };
 }
