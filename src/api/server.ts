@@ -5,6 +5,7 @@ import * as helper from "../core/helper.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {
+        // Everything is handled via HTTP GET requests to keep some easy in-browser testing (in contrast to a real/correct API design)
         const method = request.method;
         if (method !== "GET") {
             return errors.methodNotAllowedError();
@@ -14,10 +15,12 @@ export function start() {
         if (path === "/") {
             return new Response("hello", { headers: { "content-type": "text/html; charset=UTF-8" } });
         }
-        if (!params.hasToken(url)) {
+        // Some token is better than nothing and is expected via URL query param to keep some easy in-browser testing (in contrast to a real/correct API design)
+        const token = params.getTokenFromUrl(url);
+        if (token === null) {
             return errors.missingTokenError();
         }
-        if (!params.hasAdminToken(url)) {
+        if (token !== "d19f023f-bfe0-437a-9daf-7ef28386ebe2") {
             return errors.invalidTokenError();
         }
         try {

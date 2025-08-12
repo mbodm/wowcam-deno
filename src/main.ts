@@ -1,4 +1,4 @@
-import * as scraper from "./core/scraper.ts";
+import * as logic from "./core/logic.ts";
 import * as server from "./api/server.ts";
 import * as helper from "./core/helper.ts";
 import * as storage from "./core/storage.ts";
@@ -9,7 +9,7 @@ if (import.meta.main) {
     if (Deno.env.get("STOP") === "1") {
       return;
     }
-    await scraper.all();
+    await logic.executeScrapeForAllEntries();
   });
   server.start();
   helper.log("Started Deno API server.");
@@ -17,6 +17,9 @@ if (import.meta.main) {
 
 async function addDefaultAddon() {
   const addonSlug = "raiderio";
-  await storage.create(addonSlug);
-  helper.log(`Added default addon ('${addonSlug}').`);
+  const entryExists = await storage.entryExists(addonSlug);
+  if (!entryExists) {
+    await storage.addEntry(addonSlug);
+    helper.log(`Added default addon ('${addonSlug}').`);
+  }
 }

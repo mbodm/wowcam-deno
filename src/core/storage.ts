@@ -1,6 +1,6 @@
-import { AddonEntry, ScrapeResult } from "./types.ts";
+import { AddonEntry } from "./types.ts";
 
-export async function exists(addonSlug: string): Promise<boolean> {
+export async function entryExists(addonSlug: string): Promise<boolean> {
     idEmptyCheck(addonSlug);
     const kv = await Deno.openKv();
     try {
@@ -13,7 +13,7 @@ export async function exists(addonSlug: string): Promise<boolean> {
     }
 }
 
-export async function create(addonSlug: string): Promise<void> {
+export async function addEntry(addonSlug: string): Promise<void> {
     idEmptyCheck(addonSlug);
     const kv = await Deno.openKv();
     try {
@@ -24,14 +24,7 @@ export async function create(addonSlug: string): Promise<void> {
         }
         const value: AddonEntry = {
             addonSlug,
-            scrapePassed: false,
-            scrapeResult: {
-                addonSlug: "",
-                downloadUrl: "",
-                downloadUrlFinal: "",
-                scraperApiError: "",
-                scraperApiSuccess: false,
-            }
+            hadScrape: false,
         };
         const result = await kv.set(key, value);
         if (!result.ok) {
@@ -43,21 +36,18 @@ export async function create(addonSlug: string): Promise<void> {
     }
 }
 
-export async function update(addonSlug: string, scrapeResult: ScrapeResult): Promise<void> {
-    idEmptyCheck(addonSlug);
+export async function updateEntry(addonEntry: AddonEntry): Promise<void> {
+    idEmptyCheck(addonEntry.addonSlug);
     const kv = await Deno.openKv();
     try {
-        const key = kvBuildKey(addonSlug);
+        const key = kvBuildKey(addonEntry.addonSlug);
         const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
         if (!kvEntryExists(entry)) {
             throw new Error("An entry for the given 'addonSlug' argument (used as Deno KV key/ID) not exists.");
         }
-        const value: AddonEntry = {
-            addonSlug,
-            scrapePassed: true,
-            scrapeResult
-        };
-        const result = await kv.set(key, value);
+        // Of course we can use the spread operator (...) here, ommit "addonSlug", and then spread the remaining properties again.
+        // But maybe the next time i code TS again is in a half year from now, i just can't remember what all that syntax means. :)
+        const result = await kv.set(key, addonEntry);
         if (!result.ok) {
             throw new Error("Could not update Deno KV entry.");
         }
@@ -67,7 +57,7 @@ export async function update(addonSlug: string, scrapeResult: ScrapeResult): Pro
     }
 }
 
-export async function getOne(addonSlug: string): Promise<AddonEntry> {
+export async function getOneEntry(addonSlug: string): Promise<AddonEntry> {
     idEmptyCheck(addonSlug);
     const kv = await Deno.openKv();
     try {
@@ -83,7 +73,7 @@ export async function getOne(addonSlug: string): Promise<AddonEntry> {
     }
 }
 
-export async function getAll(): Promise<AddonEntry[]> {
+export async function getAllEntries(): Promise<AddonEntry[]> {
     const kv = await Deno.openKv();
     try {
         const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
@@ -99,7 +89,7 @@ export async function getAll(): Promise<AddonEntry[]> {
     }
 }
 
-export async function deleteOne(addonSlug: string): Promise<void> {
+export async function deleteOneEntry(addonSlug: string): Promise<void> {
     idEmptyCheck(addonSlug);
     const kv = await Deno.openKv();
     try {
@@ -115,7 +105,7 @@ export async function deleteOne(addonSlug: string): Promise<void> {
     }
 }
 
-export async function deleteAll(): Promise<void> {
+export async function deleteAllEntries(): Promise<void> {
     const kv = await Deno.openKv();
     try {
         const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });

@@ -12,8 +12,12 @@ export function log(msg: string): void {
     }
 }
 
-export function pluralizeWhenNecessary(count: number, singular: string): string {
-    return count === 1 ? singular : `${singular}s`;
+export function pluralizeWhenNecessary(singular: string, count: number): string {
+    if (count < 0) {
+        return singular;
+    }
+    const plural = singular === "entry" ? "entries" : singular + 's';
+    return count === 1 ? singular : plural;
 }
 
 export function createPrettyHttpStatus(status: number): string {
