@@ -62,7 +62,7 @@ async function scrapeAllEntries(): Promise<number> {
         entry.scraperApiSuccess = scrapeResult.scraperApiSuccess;
         entry.scraperApiError = scrapeResult.scraperApiError;
         entry.timestamp = scrapeResult.timestamp;
-        storage.updateEntry(entry);
+        await storage.updateEntry(entry);
         counter++;
     };
     const term = helper.pluralizeWhenNecessary("addon", counter);
