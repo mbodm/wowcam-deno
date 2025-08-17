@@ -1,11 +1,11 @@
 import * as response from "./response.ts";
 import * as params from "./params.ts";
 import * as routes from "./routes.ts";
-import * as helper from "../core/helper.ts";
+import * as helper from "../common/helper.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {
-        // Everything is handled via HTTP GET requests to keep some easy in-browser testing (in contrast to a real/correct API design)
+        // Everything is handled via HTTP GET requests to keep some easy in-browser testing (in contrast to some real/correct REST API design)
         const method = request.method;
         if (method !== "GET") {
             return response.errorMethodNotAllowed();
@@ -15,12 +15,14 @@ export function start() {
         if (path === "/") {
             return new Response("hello", { headers: { "content-type": "text/html; charset=UTF-8" } });
         }
-        // Some token is better than nothing and is expected via URL query param to keep some easy in-browser testing (in contrast to a real/correct API design)
-        const token = params.getTokenFromUrl(url);
-        if (token === null) {
+        // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
+        // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
+        // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
+        const token = params.getToken(url);
+        if (!token) {
             return response.errorMissingToken();
         }
-        if (token !== "d19f023f-bfe0-437a-9daf-7ef28386ebe2") {
+        if (token.toLowerCase() !== "d19f023f-bfe0-437a-9daf-7ef28386ebe2") {
             return response.errorInvalidToken();
         }
         try {
@@ -40,7 +42,7 @@ export function start() {
         catch (e: unknown) {
             if (e instanceof Error) {
                 helper.log(e.message);
-                return response.error("Internal server exception occurred (please check logs).", 500);
+                return response.error("Internal server exception occurred (see log for details).", 500);
             }
             return response.error("Internal server exception occurred.", 500);
         }

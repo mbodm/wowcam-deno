@@ -1,43 +1,40 @@
-import * as helper from "../core/helper.ts";
+import * as helper from "../common/helper.ts";
 import * as params from "./params.ts";
 import * as response from "./response.ts";
-import * as storage from "../core/storage.ts";
-import * as scraper from "../core/scraper.ts"
+import * as storage from "../common/storage.ts";
+import * as scraper from "../common/scraper.ts"
 
 export async function add(url: URL): Promise<Response> {
-    helper.log("Received request to add 1 or more addon entries.");
-    const addonSlugs = params.getAddonsFromUrl(url);
-    if (addonSlugs === null || addonSlugs.length < 1) {
+    helper.log("Received request to add 1 or more addon entries to storage.");
+    const addonSlugs = params.getAddonSlugs(url);
+    if (addonSlugs.length < 1) {
         return response.errorMissingAddons();
     }
-    let addedCounter = 0;
-    let existCounter = 0;
+    let counter = 0;
     for (const addonSlug of addonSlugs) {
         const exists = await storage.entryExists(addonSlug);
         if (!exists) {
             await storage.addEntry(addonSlug);
-            helper.log(`Added '${addonSlug}' addon entry.`);
-            addedCounter++;
+            helper.log(`Added '${addonSlug}' addon entry to storage.`);
+            counter++;
         }
         else {
-            helper.log(`Not added '${addonSlug}' addon entry (already existed).`);
-            existCounter++;
+            helper.log(`Not added '${addonSlug}' addon entry to storage (already existed).`);
         }
     }
-    const addedTerm = helper.pluralizeWhenNecessary('addon', addedCounter);
-    const existTerm = helper.pluralizeWhenNecessary('addon', existCounter);
-    const msg = `Added ${addedCounter} new ${addedTerm} (${existCounter} ${existTerm} already existed).`;
-    helper.log(msg);
+    const entryTerm = helper.pluralizeWhenNecessary("entry", counter);
+    helper.log(`Added ${counter} new addon ${entryTerm} to storage.`);
+    const addonTerm = helper.pluralizeWhenNecessary("addon", counter);
     const entries = await storage.getEntries();
-    return response.success(msg, entries);
+    return response.success(`Added ${counter} new ("not yet existing") ${addonTerm} to the pool.`, entries);
 }
 
 export async function get(): Promise<Response> {
-    helper.log("Received request to read all addon entries.");
+    helper.log("Received request to read all addon entries from storage.");
     const entries = await storage.getEntries();
     const count = entries.length;
     const term = helper.pluralizeWhenNecessary("addon", count);
-    return response.success(`${count} ${term} found.`, entries);
+    return response.success(`${count} ${term} found in pool.`, entries);
 }
 
 export async function scrape(): Promise<Response> {
@@ -45,13 +42,13 @@ export async function scrape(): Promise<Response> {
     const count = await scrapeAllEntries();
     const entries = await storage.getEntries();
     const term = helper.pluralizeWhenNecessary("addon", count);
-    return response.success(`${count} ${term} scraped.`, entries);
+    return response.success(`${count} ${term} scraped and updated in pool.`, entries);
 }
 
 export async function clear(): Promise<Response> {
     helper.log("Received request to clear storage.");
     await storage.deleteEntries();
-    return response.success("Cleared storage.", []);
+    return response.success("Cleared pool.", []);
 }
 
 async function scrapeAllEntries(): Promise<number> {
@@ -68,7 +65,7 @@ async function scrapeAllEntries(): Promise<number> {
         storage.updateEntry(entry);
         counter++;
     };
-    const term = helper.pluralizeWhenNecessary('addon', counter);
+    const term = helper.pluralizeWhenNecessary("addon", counter);
     helper.log(`Scraped ${counter} ${term}.`);
     return counter;
 }

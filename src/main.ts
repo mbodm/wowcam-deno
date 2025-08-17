@@ -1,6 +1,6 @@
 import * as server from "./api/server.ts";
-import * as helper from "./core/helper.ts";
-import * as storage from "./core/storage.ts";
+import * as helper from "./common/helper.ts";
+import * as storage from "./common/storage.ts";
 
 if (import.meta.main) {
   await addDefaultAddon();
@@ -25,6 +25,6 @@ async function addDefaultAddon() {
   const entryExists = await storage.entryExists(addonSlug);
   if (!entryExists) {
     await storage.addEntry(addonSlug);
-    helper.log(`Added default addon ('${addonSlug}').`);
+    helper.log(`Added default addon ('${addonSlug}') to storage.`);
   }
 }

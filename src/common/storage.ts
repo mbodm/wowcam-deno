@@ -1,4 +1,4 @@
-import { AddonEntry } from "../types.ts";
+import { AddonEntry } from "./types.ts";
 
 export async function entryExists(addonSlug: string): Promise<boolean> {
     idEmptyCheck(addonSlug);
@@ -104,4 +104,5 @@ function kvBuildKey(addonSlug: string): string[] {
 function kvEntryExists(kvEntry: Deno.KvEntryMaybe<AddonEntry>): boolean {
     // In Deno KV a "kvEntry.value === null" means "there is no entry for that key/ID at all" and NOT "this is an existing key/ID entry with just an empty value"
     return kvEntry.value !== null;
+    ƒ
 }

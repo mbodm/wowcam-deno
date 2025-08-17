@@ -1,4 +1,4 @@
-import { ScrapeResult } from "../types.ts";
+import { ScrapeResult } from "./types.ts";
 
 export async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
     const url = `https://wowcam.mbodm.com/scrape?addon=${addonSlug}`;
