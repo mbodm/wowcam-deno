@@ -1,15 +1,14 @@
-import { AddonEntry, ServerResult } from "../core/types.ts";
 import * as helper from "../core/helper.ts";
 import * as params from "./params.ts";
-import * as errors from "./errors.ts";
+import * as response from "./response.ts";
 import * as storage from "../core/storage.ts";
-import * as logic from "../core/logic.ts";
+import * as scraper from "../core/scraper.ts"
 
 export async function add(url: URL): Promise<Response> {
     helper.log("Received request to add 1 or more addon entries.");
     const addonSlugs = params.getAddonsFromUrl(url);
     if (addonSlugs === null || addonSlugs.length < 1) {
-        return errors.missingAddonsError();
+        return response.errorMissingAddons();
     }
     let addedCounter = 0;
     let existCounter = 0;
@@ -29,40 +28,47 @@ export async function add(url: URL): Promise<Response> {
     const existTerm = helper.pluralizeWhenNecessary('addon', existCounter);
     const msg = `Added ${addedCounter} new ${addedTerm} (${existCounter} ${existTerm} already existed).`;
     helper.log(msg);
-    const entries = await storage.getAllEntries();
-    return createResponse(msg, entries);
+    const entries = await storage.getEntries();
+    return response.success(msg, entries);
 }
 
 export async function get(): Promise<Response> {
     helper.log("Received request to read all addon entries.");
-    const entries = await storage.getAllEntries();
+    const entries = await storage.getEntries();
     const count = entries.length;
     const term = helper.pluralizeWhenNecessary("addon", count);
-    return createResponse(`${count} ${term} found.`, entries);
+    return response.success(`${count} ${term} found.`, entries);
 }
 
 export async function scrape(): Promise<Response> {
-    helper.log("Received request to immediately scrape all addon entries.");
-    const count = await logic.executeScrapeForAllEntries();
-    const entries = await storage.getAllEntries();
+    helper.log("Received request to scrape all addon entries.");
+    const count = await scrapeAllEntries();
+    const entries = await storage.getEntries();
     const term = helper.pluralizeWhenNecessary("addon", count);
-    return createResponse(`${count} ${term} scraped.`, entries);
+    return response.success(`${count} ${term} scraped.`, entries);
 }
 
 export async function clear(): Promise<Response> {
-    helper.log("Received request to clear all storages.");
-    await storage.deleteAllEntries();
-    return createResponse("Cleared all storages.", []);
+    helper.log("Received request to clear storage.");
+    await storage.deleteEntries();
+    return response.success("Cleared storage.", []);
 }
 
-function createResponse(msg: string, entries: AddonEntry[]): Response {
-    const serverResult: ServerResult = {
-        success: true,
-        error: "",
-        status: helper.createPrettyHttpStatus(200),
-        msg,
-        addons: entries
+async function scrapeAllEntries(): Promise<number> {
+    let counter = 0;
+    const entries = await storage.getEntries();
+    for (const entry of entries) {
+        const scrapeResult = await scraper.callScraperApi(entry.addonSlug);
+        entry.hadScrape = true;
+        entry.downloadUrl = scrapeResult.downloadUrl;
+        entry.downloadUrlFinal = scrapeResult.downloadUrlFinal;
+        entry.scraperApiSuccess = scrapeResult.scraperApiSuccess;
+        entry.scraperApiError = scrapeResult.scraperApiError;
+        entry.timestamp = scrapeResult.timestamp;
+        storage.updateEntry(entry);
+        counter++;
     };
-    const json = JSON.stringify(serverResult, null, 4);
-    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
+    const term = helper.pluralizeWhenNecessary('addon', counter);
+    helper.log(`Scraped ${counter} ${term}.`);
+    return counter;
 }

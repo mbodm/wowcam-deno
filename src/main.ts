@@ -1,4 +1,3 @@
-import * as logic from "./core/logic.ts";
 import * as server from "./api/server.ts";
 import * as helper from "./core/helper.ts";
 import * as storage from "./core/storage.ts";
@@ -9,7 +8,13 @@ if (import.meta.main) {
     if (Deno.env.get("STOP") === "1") {
       return;
     }
-    await logic.executeScrapeForAllEntries();
+    const base = import.meta.url ?? "127.0.0.1";
+    const url = new URL("/scrape", base);
+    url.searchParams.append("token", "d19f023f-bfe0-437a-9daf-7ef28386ebe2");
+    const response = await fetch(url);
+    if (!response.ok) {
+      helper.log(`Requesting '/scrape' in Deno CRON job failed (response status code was HTTP ${response.status}).`);
+    }
   });
   server.start();
   helper.log("Started Deno API server.");

@@ -1,4 +1,4 @@
-import { AddonEntry } from "./types.ts";
+import { AddonEntry } from "../types.ts";
 
 export async function entryExists(addonSlug: string): Promise<boolean> {
     idEmptyCheck(addonSlug);
@@ -57,23 +57,7 @@ export async function updateEntry(addonEntry: AddonEntry): Promise<void> {
     }
 }
 
-export async function getOneEntry(addonSlug: string): Promise<AddonEntry> {
-    idEmptyCheck(addonSlug);
-    const kv = await Deno.openKv();
-    try {
-        const key = kvBuildKey(addonSlug);
-        const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
-        if (!kvEntryExists(entry)) {
-            throw new Error("An entry for the given 'addonSlug' argument (used as Deno KV key/ID) not exists.");
-        }
-        return entry.value!;
-    }
-    finally {
-        kv.close();
-    }
-}
-
-export async function getAllEntries(): Promise<AddonEntry[]> {
+export async function getEntries(): Promise<AddonEntry[]> {
     const kv = await Deno.openKv();
     try {
         const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
@@ -89,23 +73,7 @@ export async function getAllEntries(): Promise<AddonEntry[]> {
     }
 }
 
-export async function deleteOneEntry(addonSlug: string): Promise<void> {
-    idEmptyCheck(addonSlug);
-    const kv = await Deno.openKv();
-    try {
-        const key = kvBuildKey(addonSlug);
-        const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
-        if (!kvEntryExists(entry)) {
-            throw new Error("An entry for the given 'addonSlug' argument (used as Deno KV key/ID) not exists.");
-        }
-        await kv.delete(entry.key);
-    }
-    finally {
-        kv.close();
-    }
-}
-
-export async function deleteAllEntries(): Promise<void> {
+export async function deleteEntries(): Promise<void> {
     const kv = await Deno.openKv();
     try {
         const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });

@@ -1,4 +1,4 @@
-import * as errors from "./errors.ts";
+import * as response from "./response.ts";
 import * as params from "./params.ts";
 import * as routes from "./routes.ts";
 import * as helper from "../core/helper.ts";
@@ -8,7 +8,7 @@ export function start() {
         // Everything is handled via HTTP GET requests to keep some easy in-browser testing (in contrast to a real/correct API design)
         const method = request.method;
         if (method !== "GET") {
-            return errors.methodNotAllowedError();
+            return response.errorMethodNotAllowed();
         }
         const url = new URL(request.url);
         const path = url.pathname;
@@ -18,10 +18,10 @@ export function start() {
         // Some token is better than nothing and is expected via URL query param to keep some easy in-browser testing (in contrast to a real/correct API design)
         const token = params.getTokenFromUrl(url);
         if (token === null) {
-            return errors.missingTokenError();
+            return response.errorMissingToken();
         }
         if (token !== "d19f023f-bfe0-437a-9daf-7ef28386ebe2") {
-            return errors.invalidTokenError();
+            return response.errorInvalidToken();
         }
         try {
             if (path.startsWith("/add")) {
@@ -40,9 +40,9 @@ export function start() {
         catch (e: unknown) {
             if (e instanceof Error) {
                 helper.log(e.message);
-                return errors.createResponse("Internal server exception occurred (please check logs).", 500);
+                return response.error("Internal server exception occurred (please check logs).", 500);
             }
-            return errors.createResponse("Internal server exception occurred.", 500);
+            return response.error("Internal server exception occurred.", 500);
         }
         return new Response(null, { status: 404 });
     });
