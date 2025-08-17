@@ -26,7 +26,7 @@ export async function add(url: URL): Promise<Response> {
     helper.log(`Added ${counter} new addon ${entryTerm} to storage.`);
     const addonTerm = helper.pluralizeWhenNecessary("addon", counter);
     const entries = await storage.getEntries();
-    return response.success(`Added ${counter} new ("not yet existing") ${addonTerm} to the pool.`, entries);
+    return response.success(`Added ${counter} new ('not yet existing') ${addonTerm} to the pool.`, entries);
 }
 
 export async function get(): Promise<Response> {
