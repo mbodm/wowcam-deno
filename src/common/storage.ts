@@ -76,14 +76,11 @@ export async function getEntries(): Promise<AddonEntry[]> {
 export async function deleteEntries(): Promise<void> {
     const kv = await Deno.openKv();
     try {
-        //const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
+        const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
         // The kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
-        for await (const { key } of kv.list({ prefix: [] })) {
-            await kv.delete(key);
+        for await (const entry of entries) {
+            await kv.delete(entry.key);
         }
-        // for await (const entry of entries) {
-        //     await kv.delete(entry.key);
-        // }
     }
     finally {
         kv.close();
