@@ -1,4 +1,4 @@
-name: Call WOWCAM Deno /scrape endpoint
+name: WOWCAM_DENO_PERIODIC_TRIGGER
 
 on:
   schedule:
@@ -9,6 +9,6 @@ jobs:
   scrape_trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Call WOWCAM Deno /scrape endpoint
+      - name: curl_call
         run: |
           curl -fsS "https://mbodm-wowcam.deno.dev/scrape?token=${{ secrets.WOWCAM_DENO_TOKEN }}"
