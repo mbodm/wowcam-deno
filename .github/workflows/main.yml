@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  ping:
+  scrape_trigger:
     runs-on: ubuntu-latest
     steps:
       - name: Call WOWCAM Deno /scrape endpoint
