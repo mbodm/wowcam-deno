@@ -1,0 +1,14 @@
+name: Call scrape endpoint
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes, UTC
+  workflow_dispatch:         # allows manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /scrape endpoint
+        run: |
+          curl -fsS "https://yourapp.deno.dev/scrape?token=${{ secrets.SCRAPE_TOKEN }}"
