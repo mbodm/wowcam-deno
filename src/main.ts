@@ -8,8 +8,7 @@ if (import.meta.main) {
     if (Deno.env.get("STOP") === "1") {
       return;
     }
-    const base = import.meta.url ?? "127.0.0.1";
-    const url = new URL("/scrape", base);
+    const url = new URL("https://mbodm-wowcam.deno.dev/scrape");
     url.searchParams.append("token", "d19f023f-bfe0-437a-9daf-7ef28386ebe2");
     const response = await fetch(url);
     if (!response.ok) {
