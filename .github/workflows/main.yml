@@ -1,14 +1,14 @@
-name: Call scrape endpoint
+name: Call WOWCAM Deno /scrape endpoint
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes, UTC
-  workflow_dispatch:         # allows manual trigger
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Call /scrape endpoint
+      - name: Call WOWCAM Deno /scrape endpoint
         run: |
-          curl -fsS "https://yourapp.deno.dev/scrape?token=${{ secrets.SCRAPE_TOKEN }}"
+          curl -fsS "https://wowcam.deno.dev/scrape?token=${{ secrets.WOWCAM_TOKEN }}"
