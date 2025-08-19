@@ -18,13 +18,17 @@ export function start() {
         // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
         // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
         // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
-        const token = params.getToken(url);
+        let token = params.getToken(url);
         if (!token) {
             return response.errorMissingToken();
         }
-        if (token.toLowerCase() !== "d19f023f-bfe0-437a-9daf-7ef28386ebe2") {
+        token = token.toLowerCase();
+        const validToken1 = Deno.env.get("PERSONAL_TOKEN");
+        const validToken2 = Deno.env.get("GITHUB_TOKEN");
+        if (token !== validToken1 && token !== validToken2) {
             return response.errorInvalidToken();
         }
+        const isGitHubActionsRequest = token === validToken2;
         try {
             if (path.startsWith("/add")) {
                 return await routes.add(url);
@@ -33,7 +37,7 @@ export function start() {
                 return await routes.get();
             }
             if (path.startsWith("/scrape")) {
-                return await routes.scrape();
+                return await routes.scrape(isGitHubActionsRequest);
             }
             if (path.startsWith("/clear")) {
                 return await routes.clear();

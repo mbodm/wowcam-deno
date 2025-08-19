@@ -37,8 +37,13 @@ export async function get(): Promise<Response> {
     return response.success(`${count} ${term} found in pool.`, entries);
 }
 
-export async function scrape(): Promise<Response> {
-    helper.log("Received request to scrape all addon entries.");
+export async function scrape(isGitHubActionsRequest: boolean): Promise<Response> {
+    if (isGitHubActionsRequest) {
+        helper.log("Received 'periodic' request (CRON trigger from GitHub Actions) to scrape all addon entries.");
+    }
+    else {
+        helper.log("Received 'manual' request to scrape all addon entries immediately.");
+    }
     const count = await scrapeAllEntries();
     const entries = await storage.getEntries();
     const term = helper.pluralizeWhenNecessary("addon", count);
