@@ -1,7 +1,6 @@
 import * as response from "./response.ts";
 import * as params from "./params.ts";
 import * as routes from "./routes.ts";
-import * as helper from "../common/helper.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {
@@ -45,7 +44,7 @@ export function start() {
         }
         catch (e: unknown) {
             if (e instanceof Error) {
-                helper.log(e.message);
+                console.error(e.message);
                 return response.error("Internal server exception occurred (see log for details).", 500);
             }
             return response.error("Internal server exception occurred.", 500);
