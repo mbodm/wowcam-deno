@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: curl_call
         run: |
-          curl -fsS "https://mbodm-wowcam.deno.dev/scrape?token=${{ secrets.WOWCAM_DENO_TOKEN }}"
+          curl -fsS "https://wowcam.mbodm.deno.net/scrape?token=${{ secrets.WOWCAM_DENO_TOKEN }}"
