@@ -1,42 +1,52 @@
-import { AddonEntry, ServerResult } from "../common/types.ts";
+import { ServerErrorResult, ServerSuccessResult } from "../common/types.ts";
+
+export function hello(): Response {
+    return new Response("hello", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
+}
+
+export function notFound(): Response {
+    return new Response(null, { status: 404 });
+}
 
 export function errorMethodNotAllowed(): Response {
     return error("HTTP method not allowed.", 405);
 }
 
-export function errorMissingAddons(): Response {
-    return error("Missing 'addons' query param.", 400);
+export function errorMissingAddon(): Response {
+    return error("Missing 'addon' query param.", 400);
 }
 
 export function errorMissingToken(): Response {
-    return error("Unauthorized.", 401);
+    return error("Unauthorized (missing 'token' query param).", 401);
 }
 
 export function errorInvalidToken(): Response {
-    return error("Access denied.", 403);
+    return error("Access denied (invalid 'token' query param).", 403);
 }
 
 export function error(error: string, status: number): Response {
-    const serverResult: ServerResult = {
-        success: false,
-        error,
-        status: createPrettyHttpStatus(status)
+    const serverResult: ServerErrorResult = {
+        errorMessage: error,
+        statusInfo: createPrettyStatus(status),
     };
-    return create(serverResult);
+    return createJsonResponse(status, serverResult);
 }
 
-export function success(msg: string, entries: AddonEntry[]): Response {
-    const serverResult: ServerResult = {
-        success: true,
-        error: "",
-        status: createPrettyHttpStatus(200),
-        msg,
-        addons: entries
-    };
-    return create(serverResult);
+export function success<T extends object>(infoMessage: string, payload?: T): Response {
+    const serverResult: ServerSuccessResult | (T & ServerSuccessResult) = payload
+        ? {
+            ...payload,
+            infoMessage,
+            statusInfo: createPrettyStatus(200),
+        }
+        : {
+            infoMessage,
+            statusInfo: createPrettyStatus(200),
+        };
+    return createJsonResponse(200, serverResult);
 }
 
-function createPrettyHttpStatus(status: number): string {
+function createPrettyStatus(status: number): string {
     switch (status) {
         case 200:
             return "HTTP 200 (OK)";
@@ -51,11 +61,17 @@ function createPrettyHttpStatus(status: number): string {
         case 500:
             return "HTTP 500 (Internal Server Error)";
         default:
-            return "UNKNOWN";
+            return `HTTP ${status}`;
     }
 }
 
-function create(serverResult: ServerResult): Response {
+function createJsonResponse(status: number, serverResult: ServerErrorResult | ServerSuccessResult): Response {
     const json = JSON.stringify(serverResult, null, 4);
-    return new Response(json, { headers: { "content-type": "application/json; charset=UTF-8" } });
+    return new Response(json, {
+        status,
+        headers: {
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "no-store"
+        }
+    });
 }

@@ -1,108 +1,71 @@
 import { AddonEntry } from "./types.ts";
+import { handleStringArgument } from "./helper.ts";
 
-export async function entryExists(addonSlug: string): Promise<boolean> {
-    idEmptyCheck(addonSlug);
-    const kv = await Deno.openKv();
-    try {
-        const key = kvBuildKey(addonSlug);
-        const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
-        return kvEntryExists(entry);
-    }
-    finally {
-        kv.close();
+const kv = await Deno.openKv();
+
+type KvKey = readonly ["addon", string];
+
+type KvValue = {
+    downloadUrl: string,
+    scrapedAt: string
+};
+
+export async function addOrUpdate(addonSlug: string, downloadUrl: string, scrapedAt: string): Promise<void> {
+    const key = buildKvKey(handleStringArgument(addonSlug, "addonSlug").toLowerCase());
+    const value: KvValue = {
+        downloadUrl: handleStringArgument(downloadUrl, "downloadUrl"),
+        scrapedAt: handleStringArgument(scrapedAt, "scrapedAt"),
+    };
+    const result = await kv.set(key, value);
+    if (!result.ok) {
+        throw new Error("Could not write Deno KV entry.");
     }
 }
 
-export async function addEntry(addonSlug: string): Promise<void> {
-    idEmptyCheck(addonSlug);
-    const kv = await Deno.openKv();
-    try {
-        const key = kvBuildKey(addonSlug);
-        const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
-        if (kvEntryExists(entry)) {
-            throw new Error("An entry for the given 'addonSlug' argument (used as Deno KV key/ID) already exists.");
-        }
-        const value: AddonEntry = {
-            addonSlug,
-            hadScrape: false,
-        };
-        const result = await kv.set(key, value);
-        if (!result.ok) {
-            throw new Error("Could not create Deno KV entry.");
-        }
-    }
-    finally {
-        kv.close();
-    }
+export async function getOne(addonSlug: string): Promise<AddonEntry | null> {
+    const key = buildKvKey(handleStringArgument(addonSlug, "addonSlug").toLowerCase());
+    const entry = await kv.get<KvValue>(key);
+    return kvEntryExists(entry) ? createAddonEntry(key, entry.value) : null;
 }
 
-export async function updateEntry(addonEntry: AddonEntry): Promise<void> {
-    idEmptyCheck(addonEntry.addonSlug);
-    const kv = await Deno.openKv();
-    try {
-        const key = kvBuildKey(addonEntry.addonSlug);
-        const entry: Deno.KvEntryMaybe<AddonEntry> = await kv.get(key);
-        if (!kvEntryExists(entry)) {
-            throw new Error("An entry for the given 'addonSlug' argument (used as Deno KV key/ID) not exists.");
-        }
-        // Of course we can use the spread operator (...) here, ommit "addonSlug", and then spread the remaining properties again.
-        // But maybe the next time i code TS again is in a half year from now, i just can't remember what all that syntax means. :)
-        const result = await kv.set(key, addonEntry);
-        if (!result.ok) {
-            throw new Error("Could not update Deno KV entry.");
+export async function getAll(): Promise<AddonEntry[]> {
+    const addonEntries: AddonEntry[] = [];
+    // The encapsulated kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
+    for await (const e of getKvEntries()) {
+        if (isKvKey(e.key)) {
+            addonEntries.push(createAddonEntry(e.key, e.value));
         }
     }
-    finally {
-        kv.close();
-    }
+    return addonEntries;
 }
 
-export async function getEntries(): Promise<AddonEntry[]> {
-    const kv = await Deno.openKv();
-    try {
-        const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
-        const result: AddonEntry[] = [];
-        // The kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
-        for await (const entry of entries) {
-            result.push(entry.value);
-        }
-        return result;
-    }
-    finally {
-        kv.close();
-    }
-}
-
-export async function deleteEntries(): Promise<void> {
-    const kv = await Deno.openKv();
-    try {
-        const entries: Deno.KvListIterator<AddonEntry> = kv.list({ prefix: ["addon"] });
-        // The kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
-        for await (const entry of entries) {
-            await kv.delete(entry.key);
+export async function clear(): Promise<void> {
+    // The encapsulated kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
+    for await (const e of getKvEntries()) {
+        if (isKvKey(e.key)) {
+            await kv.delete(e.key);
         }
     }
-    finally {
-        kv.close();
-    }
 }
 
-function idEmptyCheck(addonSlug: string): void {
-    if (addonSlug === "") {
-        throw new Error("The given 'addonSlug' argument (used as Deno KV key/ID) is an empty string.");
-    }
-    if (addonSlug.trim() === "") {
-        throw new Error("The given 'addonSlug' argument (used as Deno KV key/ID) is a string which contains whitespaces only.");
-    }
-}
+// In Deno KV a key is a unique array of key parts (Note: A Curse addon slug is already a unique identifier)
+const buildKvKey = (addonSlug: string): KvKey =>
+    ["addon", addonSlug] as const;
 
-function kvBuildKey(addonSlug: string): string[] {
-    // In Deno KV a key/ID is a unique array of strings (a Curse addon slug is already a unique string)
-    return ["addon", addonSlug];
-}
+// A "kvEntry.value === null" in Deno KV
+// - means: "There is no entry at all, for given key."
+// - means NOT: "This is an existing entry, for given key, just with an empty value."
+const kvEntryExists = (kvEntry: Deno.KvEntryMaybe<KvValue>): kvEntry is Deno.KvEntry<KvValue> =>
+    kvEntry.value !== null;
 
-function kvEntryExists(kvEntry: Deno.KvEntryMaybe<AddonEntry>): boolean {
-    // In Deno KV a "kvEntry.value === null" means "there is no entry for that key/ID at all" and NOT "this is an existing key/ID entry with just an empty value"
-    return kvEntry.value !== null;
-    ƒ
-}
+const createAddonEntry = (key: KvKey, value: KvValue): AddonEntry => ({
+    addonSlug: key[1],
+    downloadUrl: value.downloadUrl,
+    scrapedAt: value.scrapedAt
+});
+
+const getKvEntries = (): Deno.KvListIterator<KvValue> =>
+    kv.list<KvValue>({ prefix: ["addon"] });
+
+const isKvKey = (key: Deno.KvKey): key is KvKey =>
+    key.length === 2 && key[0] === "addon" && typeof key[1] === "string";

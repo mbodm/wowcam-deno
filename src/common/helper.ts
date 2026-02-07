@@ -1,3 +1,11 @@
+export function handleStringArgument(value: string, name: string): string {
+    const s = value.trim();
+    if (s === "") {
+        throw new Error(`The given "${name}" argument is an empty string (or contains whitespaces only).`);
+    }
+    return s;
+}
+
 export function autoPluralize(singular: string, count: number): string {
     if (count < 0) {
         return singular;

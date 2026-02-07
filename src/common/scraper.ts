@@ -1,22 +1,44 @@
-import { ScrapeResult } from "./types.ts";
+import { AddonEntry } from "./types.ts";
+import { handleStringArgument } from "./helper.ts";
+import { isNonEmptyString } from "./guards.ts";
 
-export async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
-    const url = `https://wowcam.mbodm.com/scrape?addon=${addonSlug}`;
-    const response = await fetch(url);
-    const obj = await response.json();
-    if (!obj) {
-        throw new Error("Response from scraper API was an undefined object.");
+type ScraperApiSuccessResponse = {
+    addonSlug: string,
+    downloadUrl: string
+};
+
+type ScraperApiErrorResponse = {
+    errorMessage: string
+};
+
+export async function callScraperApi(addonSlug: string): Promise<AddonEntry> {
+    const result: AddonEntry = {
+        addonSlug: handleStringArgument(addonSlug, "addonSlug").toLowerCase(),
+        downloadUrl: "",
+        scrapedAt: new Date().toISOString()
     }
-    if (!obj.result) {
-        throw new Error("Response from scraper API contained an undefinded object as 'result' property.");
+    const scraperUrl = `https://wowcam.mbodm.com/scrape?addon=${encodeURIComponent(result.addonSlug)}`;
+    const response = await fetch(scraperUrl, { signal: AbortSignal.timeout(30_000) });
+    const content: unknown = await response.json();
+    if (!response.ok) {
+        const baseMessage = `Received response error from scraper API -> HTTP ${response.status} (${response.statusText})`;
+        const message = isScraperApiErrorResponse(content) ? `${baseMessage}: ${content.errorMessage.trim()}` : baseMessage;
+        throw new Error(message);
     }
-    const timestamp = new Date().toISOString();
-    return {
-        addonSlug,
-        downloadUrl: obj.result.downloadUrl ?? "",
-        downloadUrlFinal: obj.result.downloadUrlFinal ?? "",
-        scraperApiSuccess: obj.success ?? false,
-        scraperApiError: obj.error ?? "",
-        timestamp
-    };
+    if (!isScraperApiSuccessResponse(content) || content.addonSlug.trim().toLowerCase() !== result.addonSlug) {
+        throw new Error("Received successful HTTP 2xx response from scraper API, but the response JSON did not contain the expected addon slug and download URL.");
+    }
+    result.downloadUrl = content.downloadUrl.trim();
+    return result;
 }
+
+// Type Guards
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isScraperApiSuccessResponse = (content: unknown): content is ScraperApiSuccessResponse =>
+    isObject(content) && isNonEmptyString(content.addonSlug) && isNonEmptyString(content.downloadUrl);
+
+const isScraperApiErrorResponse = (content: unknown): content is ScraperApiErrorResponse =>
+    isObject(content) && isNonEmptyString(content.errorMessage);

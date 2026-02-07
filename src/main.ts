@@ -9,9 +9,9 @@ if (import.meta.main) {
 
 async function addDefaultAddon() {
   const addonSlug = "raiderio";
-  const entryExists = await storage.entryExists(addonSlug);
+  const entryExists = await storage.exists(addonSlug);
   if (!entryExists) {
-    await storage.addEntry(addonSlug);
+    await storage.add(addonSlug);
     console.log(`Added default addon ('${addonSlug}') to storage.`);
   }
 }

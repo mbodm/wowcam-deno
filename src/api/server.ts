@@ -1,6 +1,6 @@
 import * as response from "./response.ts";
-import * as params from "./params.ts";
 import * as routes from "./routes.ts";
+import { isNonEmptyString } from "../common/guards.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {
@@ -10,45 +10,51 @@ export function start() {
             return response.errorMethodNotAllowed();
         }
         const url = new URL(request.url);
-        const path = url.pathname;
+        const path = url.pathname.trim();
         if (path === "/") {
-            return new Response("hello", { headers: { "content-type": "text/html; charset=UTF-8" } });
+            // Deno not sends any content type by default (in contrast to Node)
+            return response.hello();
         }
-        // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
-        // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
-        // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
-        let token = params.getToken(url);
-        if (!token) {
-            return response.errorMissingToken();
+        const tokenErrorResponse = getTokenErrorResponse(url);
+        if (tokenErrorResponse) {
+            return tokenErrorResponse;
         }
-        token = token.toLowerCase();
-        const validToken1 = Deno.env.get("PERSONAL_TOKEN");
-        const validToken2 = Deno.env.get("GITHUB_TOKEN");
-        if (token !== validToken1 && token !== validToken2) {
-            return response.errorInvalidToken();
-        }
-        const isGitHubActionsRequest = token === validToken2;
         try {
-            if (path.startsWith("/add")) {
-                return await routes.add(url);
-            }
-            if (path.startsWith("/get")) {
-                return await routes.get();
-            }
-            if (path.startsWith("/scrape")) {
-                return await routes.scrape(isGitHubActionsRequest);
-            }
-            if (path.startsWith("/clear")) {
-                return await routes.clear();
+            switch (path) {
+                case "/":
+                    return routes.root();
+                case "/resolve":
+                    return await routes.resolve(url);
+                case "/clear":
+                    return await routes.clear();
+                default:
+                    return response.notFound();
             }
         }
-        catch (e: unknown) {
-            if (e instanceof Error) {
-                console.error(e.message);
-                return response.error("Internal server exception occurred (see log for details).", 500);
-            }
-            return response.error("Internal server exception occurred.", 500);
+        catch (err: unknown) {
+            console.log(err);
+            const msg = err instanceof Error ? err.message : "An internal server error occurred (check logs for details).";
+            return response.error(msg, 500);
         }
-        return new Response(null, { status: 404 });
     });
+}
+
+function getTokenErrorResponse(url: URL): Response | null {
+    // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
+    // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
+    // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
+    const tokenParam = url.searchParams.get("token");
+    if (!isNonEmptyString(tokenParam)) {
+        return response.errorMissingToken();
+    }
+    const token = tokenParam.trim().toLowerCase();
+    const validToken = Deno.env.get("WOWCAM_TOKEN");
+    if (!validToken) {
+        console.error("Could not found WOWCAM_TOKEN in env settings.");
+        return response.error("Internal server error occurred (please check logs).", 500);
+    }
+    if (token !== validToken) {
+        return response.errorInvalidToken();
+    }
+    return null;
 }
