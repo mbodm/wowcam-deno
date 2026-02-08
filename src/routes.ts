@@ -24,6 +24,11 @@ export async function resolve(url: URL): Promise<Response> {
     return response.success("Added addon to cache.", newAddonEntry);
 }
 
+export async function all(): Promise<Response> {
+    const addonEntries = await storage.getAll();
+    return response.success("All existing entries", {addonEntries});
+}
+
 export async function clear(): Promise<Response> {
     console.log("Received request to clear storage.");
     await storage.clear();

@@ -1,5 +1,5 @@
+import { resolve } from "./logic.ts";
 import * as server from "./server.ts";
-import * as storage from "./storage.ts";
 
 if (import.meta.main) {
   await addDefaultAddon();
@@ -8,7 +8,7 @@ if (import.meta.main) {
 }
 
 async function addDefaultAddon() {
-  const addonSlug = "raiderio";
-  await storage.addOrUpdate(addonSlug, "", "");
-  console.log(`Added default addon ('${addonSlug}') to storage.`);
+  const addon = "raiderio";
+  await resolve(addon);
+  console.log(`Scraped and added default addon ("${addon}") to storage.`);
 }

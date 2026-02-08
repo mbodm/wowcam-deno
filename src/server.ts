@@ -50,7 +50,7 @@ function getTokenErrorResponse(url: URL): Response | null {
     const token = tokenParam.trim().toLowerCase();
     const validToken = Deno.env.get("WOWCAM_TOKEN");
     if (!validToken) {
-        console.error("Could not found WOWCAM_TOKEN in env settings.");
+        console.error("Could not found WOWCAM_TOKEN in environment settings.");
         return response.error("Internal server error occurred (please check logs).", 500);
     }
     if (token !== validToken) {
