@@ -11,10 +11,11 @@ type KvValue = {
 };
 
 export async function addOrUpdate(addonSlug: string, downloadUrl: string, scrapedAt: string): Promise<void> {
-    const key = buildKvKey(handleStringArgument(addonSlug, "addonSlug").toLowerCase());
+    const name = handleStringArgument(addonSlug, "addonSlug").toLowerCase();
+    const key = buildKvKey(name);
     const value: KvValue = {
-        downloadUrl: handleStringArgument(downloadUrl, "downloadUrl"),
-        scrapedAt: handleStringArgument(scrapedAt, "scrapedAt"),
+        downloadUrl: downloadUrl.trim(),
+        scrapedAt: scrapedAt.trim(),
     };
     const result = await kv.set(key, value);
     if (!result.ok) {

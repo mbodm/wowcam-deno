@@ -34,11 +34,11 @@ export async function callScraperApi(addonSlug: string): Promise<AddonEntry> {
 
 // Type Guards
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-    typeof value === "object" && value !== null && !Array.isArray(value);
+const isScraperApiErrorResponse = (content: unknown): content is ScraperApiErrorResponse =>
+    isObject(content) && isNonEmptyString(content.errorMessage);
 
 const isScraperApiSuccessResponse = (content: unknown): content is ScraperApiSuccessResponse =>
     isObject(content) && isNonEmptyString(content.addonSlug) && isNonEmptyString(content.downloadUrl);
 
-const isScraperApiErrorResponse = (content: unknown): content is ScraperApiErrorResponse =>
-    isObject(content) && isNonEmptyString(content.errorMessage);
+const isObject = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value);
