@@ -1,7 +1,7 @@
-import { isNonEmptyString } from "../common/guards.ts";
+import { isNonEmptyString } from "./guards.ts";
 import * as response from "./response.ts";
-import * as scraper from "../common/scraper.ts";
-import * as storage from "../common/storage.ts";
+import * as scraper from "./scraper.ts";
+import * as storage from "./storage.ts";
 
 export function root() {
     return response.hello();

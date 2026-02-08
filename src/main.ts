@@ -1,5 +1,5 @@
-import * as server from "./api/server.ts";
-import * as storage from "./common/storage.ts";
+import * as server from "./server.ts";
+import * as storage from "./storage.ts";
 
 if (import.meta.main) {
   await addDefaultAddon();

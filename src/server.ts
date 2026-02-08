@@ -1,6 +1,6 @@
 import * as response from "./response.ts";
 import * as routes from "./routes.ts";
-import { isNonEmptyString } from "../common/guards.ts";
+import { isNonEmptyString } from "./guards.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {

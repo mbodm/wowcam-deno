@@ -1,4 +1,4 @@
-import { ServerErrorResult, ServerSuccessResult } from "../common/types.ts";
+import { ServerErrorResult, ServerSuccessResult } from "./types.ts";
 
 export function hello(): Response {
     return new Response("hello", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
