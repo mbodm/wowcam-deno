@@ -1,6 +1,4 @@
-import { AddonEntry } from "./types.ts";
-import { handleStringArgument } from "./helper.ts";
-import { isNonEmptyString } from "./guards.ts";
+import { isNonEmptyString } from "./common.ts";
 
 type ScraperApiSuccessResponse = {
     addonSlug: string,
@@ -11,13 +9,20 @@ type ScraperApiErrorResponse = {
     errorMessage: string
 };
 
-export async function callScraperApi(addonSlug: string): Promise<AddonEntry> {
-    const result: AddonEntry = {
-        addonSlug: handleStringArgument(addonSlug, "addonSlug").toLowerCase(),
-        downloadUrl: "",
-        scrapedAt: new Date().toISOString()
+export type ScrapeResult = {
+    addonSlug: string,
+    downloadUrl: string,
+    scrapedAt: string
+};
+
+export async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
+    const addonSlugNormalized = addonSlug.toLowerCase().trim();
+    if (addonSlugNormalized === "") {
+        const err = new Error("The given 'addonSlug' argument is an empty string (or contains whitespaces only).");
+        err.name = "ScraperModuleInputValidationError";
+        throw err;
     }
-    const scraperUrl = `https://wowcam.mbodm.com/scrape?addon=${encodeURIComponent(result.addonSlug)}`;
+    const scraperUrl = `https://wowcam.mbodm.com/scrape?addon=${encodeURIComponent(addonSlugNormalized)}`;
     const response = await fetch(scraperUrl, { signal: AbortSignal.timeout(30_000) });
     const content: unknown = await response.json();
     if (!response.ok) {
@@ -25,10 +30,14 @@ export async function callScraperApi(addonSlug: string): Promise<AddonEntry> {
         const message = isScraperApiErrorResponse(content) ? `${baseMessage}: ${content.errorMessage.trim()}` : baseMessage;
         throw new Error(message);
     }
-    if (!isScraperApiSuccessResponse(content) || content.addonSlug.trim().toLowerCase() !== result.addonSlug) {
+    if (!isScraperApiSuccessResponse(content) || content.addonSlug.toLowerCase().trim() !== addonSlugNormalized) {
         throw new Error("Received successful HTTP 2xx response from scraper API, but the response JSON did not contain the expected addon slug and download URL.");
     }
-    result.downloadUrl = content.downloadUrl.trim();
+    const result: ScrapeResult = {
+        addonSlug: addonSlugNormalized,
+        downloadUrl: content.downloadUrl.trim(),
+        scrapedAt: new Date().toISOString().slice(0, 16) + "Z"
+    };
     return result;
 }
 

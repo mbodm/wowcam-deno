@@ -1,6 +1,5 @@
 import * as response from "./response.ts";
 import * as routes from "./routes.ts";
-import { isNonEmptyString } from "./guards.ts";
 
 export function start() {
     Deno.serve(async (request: Request) => {
@@ -10,51 +9,34 @@ export function start() {
             return response.errorMethodNotAllowed();
         }
         const url = new URL(request.url);
-        const path = url.pathname.trim();
-        if (path === "/") {
-            // Deno not sends any content type by default (in contrast to Node)
-            return response.hello();
-        }
-        const tokenErrorResponse = getTokenErrorResponse(url);
-        if (tokenErrorResponse) {
-            return tokenErrorResponse;
-        }
+        const path = url.pathname;
         try {
             switch (path) {
                 case "/":
-                    return routes.root();
-                case "/resolve":
-                    return await routes.resolve(url);
+                    return routes.root(url);
+                case "/fetch":
+                    return await routes.fetch(url);
+                case "/scrape":
+                    return await routes.scrape(url);
+                case "/refresh":
+                    return routes.refresh(url);
+                case "/show":
+                    return await routes.show(url);
                 case "/clear":
-                    return await routes.clear();
+                    return await routes.clear(url);
                 default:
                     return response.notFound();
             }
         }
         catch (err: unknown) {
-            console.log(err);
-            const msg = err instanceof Error ? err.message : "An internal server error occurred (check logs for details).";
+            const msg = "An internal server error occurred (check logs for details).";
+            if (err instanceof Error) {
+                if (!err.name.endsWith("ModuleInputValidationError")) {
+                    return response.error(err.message, 500);
+                }
+                console.error(err.message);
+            }
             return response.error(msg, 500);
         }
     });
-}
-
-function getTokenErrorResponse(url: URL): Response | null {
-    // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
-    // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
-    // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
-    const tokenParam = url.searchParams.get("token");
-    if (!isNonEmptyString(tokenParam)) {
-        return response.errorMissingToken();
-    }
-    const token = tokenParam.trim().toLowerCase();
-    const validToken = Deno.env.get("WOWCAM_TOKEN");
-    if (!validToken) {
-        console.error("Could not found WOWCAM_TOKEN in environment settings.");
-        return response.error("Internal server error occurred (please check logs).", 500);
-    }
-    if (token !== validToken) {
-        return response.errorInvalidToken();
-    }
-    return null;
 }

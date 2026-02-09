@@ -1,6 +1,15 @@
-import { ServerErrorResult, ServerSuccessResult } from "./types.ts";
+export type ServerSuccessResult = {
+    infoMessage: string,
+    statusInfo: string
+};
+
+export type ServerErrorResult = {
+    errorMessage: string,
+    statusInfo: string
+};
 
 export function hello(): Response {
+    // Deno not sends any content type by default (in contrast to Node)
     return new Response("hello", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
 }
 
@@ -49,17 +58,17 @@ export function success<T extends object>(infoMessage: string, payload?: T): Res
 function createPrettyStatus(status: number): string {
     switch (status) {
         case 200:
-            return "HTTP 200 (OK)";
+            return "HTTP 200 OK";
         case 400:
-            return "HTTP 400 (Bad Request)";
+            return "HTTP 400 Bad Request";
         case 401:
-            return "HTTP 401 (Unauthorized)";
+            return "HTTP 401 Unauthorized";
         case 403:
-            return "HTTP 403 (Forbidden)";
+            return "HTTP 403 Forbidden";
         case 404:
-            return "HTTP 404 (Not Found)";
+            return "HTTP 404 Not Found";
         case 500:
-            return "HTTP 500 (Internal Server Error)";
+            return "HTTP 500 Internal Server Error";
         default:
             return `HTTP ${status}`;
     }
