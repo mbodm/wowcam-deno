@@ -8,12 +8,12 @@ export type AddonEntry = {
     fromCache: boolean
 };
 
-export async function fetcheOne(addonSlug: string): Promise<AddonEntry> {
+export async function handleOne(addonSlug: string): Promise<AddonEntry> {
     // If in cache -> Use from cache
-    const existingStorageEnty = await storage.getOne(addonSlug);
-    if (existingStorageEnty) {
+    const existingEntry = await storage.getOne(addonSlug);
+    if (existingEntry) {
         return {
-            ...existingStorageEnty,
+            ...existingEntry,
             fromCache: true
         };
     }
@@ -27,22 +27,30 @@ export async function fetcheOne(addonSlug: string): Promise<AddonEntry> {
     }
 }
 
-export async function refreshAll(): Promise<number> {
-    const storageEntries = await storage.getAll();
-    let failedEntries = 0;
-    for (const storageEnty of storageEntries) {
+export async function refreshAll(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    const entries = await storage.getAll();
+    const total = entries.length;
+    if (total <= 0) {
+        console.log("Nothing to refresh (storage is empty)");
+        return;
+    }
+    let failed = 0;
+    for (const entry of entries) {
         try {
-            const scrapeResult = await callScraperApi(storageEnty.addonSlug);
+            const scrapeResult = await callScraperApi(entry.addonSlug);
             const { downloadUrl, scrapedAt } = scrapeResult;
-            await storage.addOrUpdate(storageEnty.addonSlug, downloadUrl, scrapedAt);
+            await storage.addOrUpdate(entry.addonSlug, downloadUrl, scrapedAt);
         }
-        catch (err) {
-            const msg = err instanceof Error
-                ? err.message
-                : "Error occured while background refreshing (continue with next entry)";
-            console.error(msg);
-            failedEntries++;
+        catch (err: unknown) {
+            console.error("Error while background refreshing (will skip and continue with next one):", err);
+            failed++;
         }
     }
-    return failedEntries;
+    if (failed > 0) {
+        console.error(`Finished background refreshing (${failed}/${total} failed)`);
+    }
+    else {
+        console.log(`Finished background refreshing (${total}/${total} successful)`);
+    }
 }

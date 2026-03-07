@@ -8,51 +8,26 @@ export type ServerErrorResult = {
     statusInfo: string
 };
 
-export function hello(): Response {
-    // Deno not sends any content type by default (in contrast to Node)
-    return new Response("hello", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
-}
-
-export function notFound(): Response {
-    return new Response(null, { status: 404 });
-}
-
-export function errorMethodNotAllowed(): Response {
-    return error("HTTP method not allowed.", 405);
-}
-
-export function errorMissingAddon(): Response {
-    return error("Missing 'addon' query param.", 400);
-}
-
-export function errorMissingToken(): Response {
-    return error("Unauthorized (missing 'token' query param).", 401);
-}
-
-export function errorInvalidToken(): Response {
-    return error("Access denied (invalid 'token' query param).", 403);
-}
-
 export function error(error: string, status: number): Response {
-    const serverResult: ServerErrorResult = {
+    return createJsonResponse(status, {
         errorMessage: error,
-        statusInfo: createPrettyStatus(status),
-    };
-    return createJsonResponse(status, serverResult);
+        statusInfo: createPrettyStatus(status)
+    });
 }
 
-export function success<T extends object>(infoMessage: string, payload?: T): Response {
-    const serverResult: ServerSuccessResult | (T & ServerSuccessResult) = payload
-        ? {
+export function success<T extends object>(info: string, payload?: T): Response {
+    const statusInfo = createPrettyStatus(200);
+    if (payload) {
+        return createJsonResponse(200, {
             ...payload,
-            infoMessage,
-            statusInfo: createPrettyStatus(200),
-        }
-        : {
-            infoMessage,
-            statusInfo: createPrettyStatus(200),
-        };
-    return createJsonResponse(200, serverResult);
+            infoMessage: info,
+            statusInfo
+        });
+    }
+    return createJsonResponse(200, {
+        infoMessage: info,
+        statusInfo
+    });
 }
 
 function createPrettyStatus(status: number): string {
@@ -69,6 +44,8 @@ function createPrettyStatus(status: number): string {
             return "HTTP 404 Not Found";
         case 500:
             return "HTTP 500 Internal Server Error";
+        case 502:
+            return "HTTP 502 Bad Gateway";
         default:
             return `HTTP ${status}`;
     }

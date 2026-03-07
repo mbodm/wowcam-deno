@@ -1,6 +1,6 @@
-import * as server from "./server.ts";
+import { start } from "./server.ts";
 
 if (import.meta.main) {
-  server.start();
-  console.log("Started Deno server.");
+  start();
+  console.log("Deno server started");
 }

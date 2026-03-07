@@ -1,84 +1,78 @@
 const kv = await Deno.openKv();
 
-type KvKey = readonly ["addon", string];
+type AddonKvKey = readonly ["addon", string];
 
-type KvValue = {
+type AddonKvValue = {
     downloadUrl: string,
     scrapedAt: string
 };
 
-export type StorageEntry = {
+export type AddonStorageEntry = {
     addonSlug: string,
     downloadUrl: string,
     scrapedAt: string,
 };
 
 export async function addOrUpdate(addonSlug: string, downloadUrl: string, scrapedAt: string): Promise<void> {
-    const key = buildKvKey(handleAddonSlugArgument(addonSlug));
-    const value: KvValue = {
+    const key = buildAddonKvKey(addonSlug);
+    const value: AddonKvValue = {
         downloadUrl: downloadUrl.trim(),
         scrapedAt: scrapedAt.trim(),
     };
     const result = await kv.set(key, value);
     if (!result.ok) {
-        throw new Error("Could not write Deno KV entry.");
+        throw new Error("Could not write Deno KV entry");
     }
 }
 
-export async function getOne(addonSlug: string): Promise<StorageEntry | null> {
-    const key = buildKvKey(handleAddonSlugArgument(addonSlug));
-    const entry = await kv.get<KvValue>(key);
+export async function getOne(addonSlug: string): Promise<AddonStorageEntry | null> {
+    const key = buildAddonKvKey(addonSlug);
+    const entry = await kv.get<AddonKvValue>(key);
     return kvEntryExists(entry) ? createStorageEntry(key, entry.value) : null;
 }
 
-export async function getAll(): Promise<StorageEntry[]> {
-    const storageEntries: StorageEntry[] = [];
-    // The encapsulated kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
-    for await (const e of getKvEntries()) {
-        if (isKvKey(e.key)) {
-            storageEntries.push(createStorageEntry(e.key, e.value));
-        }
+export async function getAll(): Promise<AddonStorageEntry[]> {
+    const storageEntries: AddonStorageEntry[] = [];
+    // The encapsulated kv.list() function per se returns an AsyncIterableIterator<> type (that's why we do "for await" here)
+    for await (const e of getAddonKvEntries()) {
+        storageEntries.push(createStorageEntry(e.key, e.value));
     }
     return storageEntries;
 }
 
 export async function clear(): Promise<void> {
-    // The encapsulated kv.list() function returns an AsyncIterableIterator<> type (that's why we do "for await" here)
-    for await (const e of getKvEntries()) {
-        if (isKvKey(e.key)) {
-            await kv.delete(e.key);
-        }
+    // The encapsulated kv.list() function per se returns an AsyncIterableIterator<> type (that's why we do "for await" here)
+    for await (const e of getAddonKvEntries()) {
+        await kv.delete(e.key);
     }
 }
 
-const buildKvKey = (addonSlug: string): KvKey =>
-    // In Deno KV a key is a unique array of key parts (Note: A Curse addon slug is already a unique identifier)
-    ["addon", addonSlug] as const;
-
-const handleAddonSlugArgument = (addonSlug: string): string => {
-    const addonSlugNormalized = addonSlug.toLowerCase().trim();
-    if (addonSlugNormalized === "") {
-        const err = new Error("The given 'addonSlug' argument is an empty string (or contains whitespaces only).");
-        err.name = "StorageModuleInputValidationError";
-        throw err;
+// In Deno KV a key is a unique array of key parts (Note: A Curse addon slug is already a unique identifier)
+const buildAddonKvKey = (addonSlug: string): AddonKvKey => {
+    if (!isNonEmptyString(addonSlug)) {
+        throw new Error("Given 'addonSlug' is an empty string (or contains whitespaces only)");
     }
-    return addonSlugNormalized;
+    const normalizedAddonSlug = addonSlug.toLowerCase().trim();
+    return ["addon", normalizedAddonSlug] as const;
 }
 
-const kvEntryExists = (kvEntry: Deno.KvEntryMaybe<KvValue>): kvEntry is Deno.KvEntry<KvValue> =>
-    // A "kvEntry.value === null" in Deno KV
-    // - means: "There is no entry at all, for given key."
-    // - means NOT: "This is an existing entry, for given key, just with an empty value."
+// Type Guard
+const isNonEmptyString = (u: unknown): u is string =>
+    typeof u === "string" && u.trim().length > 0;
+
+// A "kvEntry.value === null" in Deno KV
+// - means: "There is no entry at all, for given key."
+// - means NOT: "This is an existing entry, for given key, just with an empty value."
+const kvEntryExists = (kvEntry: Deno.KvEntryMaybe<AddonKvValue>): kvEntry is Deno.KvEntry<AddonKvValue> =>
     kvEntry.value !== null;
 
-const createStorageEntry = (key: KvKey, value: KvValue): StorageEntry => ({
+const createStorageEntry = (key: AddonKvKey, value: AddonKvValue): AddonStorageEntry => ({
     addonSlug: key[1],
     downloadUrl: value.downloadUrl,
     scrapedAt: value.scrapedAt,
 });
 
-const getKvEntries = (): Deno.KvListIterator<KvValue> =>
-    kv.list<KvValue>({ prefix: ["addon"] });
-
-const isKvKey = (key: Deno.KvKey): key is KvKey =>
-    key.length === 2 && key[0] === "addon" && typeof key[1] === "string";
+// Sadly Deno.KvListIterator<> does not support a generic type T for the key (so we do a bit more complex typing here and use an explicit cast)
+// Otherwise we would need a type guard for every entry in every loop iteration (even though the key shape is already safe at runtime via prefix)
+const getAddonKvEntries = (): AsyncIterableIterator<Deno.KvEntry<AddonKvValue> & { key: AddonKvKey }> =>
+    kv.list<AddonKvValue>({ prefix: ["addon"] }) as AsyncIterableIterator<Deno.KvEntry<AddonKvValue> & { key: AddonKvKey }>;
