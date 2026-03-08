@@ -20,11 +20,11 @@ export async function handleOne(addonSlug: string): Promise<AddonEntry> {
         };
     }
     // If not in cache -> Scrape and add to cache
-    const scrapeResult = await callScraperApi(addonSlug);
-    const { downloadUrl, scrapedAt } = scrapeResult;
     if (existingEntries.length >= 255) {
         throw new RouteError(507, "Reached cache limit of 255 entries");
     }
+    const scrapeResult = await callScraperApi(addonSlug);
+    const { downloadUrl, scrapedAt } = scrapeResult;
     await storage.addOrUpdate(addonSlug, downloadUrl, scrapedAt);
     return {
         ...scrapeResult,
