@@ -13,11 +13,19 @@ export class RouteError extends Error {
 export async function get(url: URL): Promise<Response> {
     requireAuth(url);
     const addonSlug = getAddonSlug(url);
-    const addonEntry = await handleOne(addonSlug);
-    const infoMessage = addonEntry.fromCache
-        ? "Used addon from cache (1h max age)"
-        : "Scraped addon and added it to cache";
-    return response.success(infoMessage, addonEntry);
+    try {
+        const addonEntry = await handleOne(addonSlug);
+        const infoMessage = addonEntry.fromCache
+            ? "Used addon from cache (1h max age)"
+            : "Scraped addon and added it to cache";
+        return response.success(infoMessage, addonEntry);
+    }
+    catch (err: unknown) {
+        if (err instanceof UpstreamError) {
+            throw new RouteError(502, "An upstream error occurred in /get route (check logs for details)", err);
+        }
+        throw err;
+    }
 }
 
 export async function scrape(url: URL): Promise<Response> {
@@ -29,7 +37,7 @@ export async function scrape(url: URL): Promise<Response> {
     }
     catch (err: unknown) {
         if (err instanceof UpstreamError) {
-            throw new RouteError(502, "An upstream error occurred (check logs for details)", err);
+            throw new RouteError(502, "An upstream error occurred in /scrape route (check logs for details)", err);
         }
         throw err;
     }
@@ -76,7 +84,7 @@ function requireAuth(url: URL): void {
     }
 }
 
-const getAddonSlug = (url: URL): string => {
+function getAddonSlug(url: URL): string {
     const addonParam = url.searchParams.get("addon");
     if (addonParam === null) {
         throw new RouteError(400, "Missing 'addon' query param");
@@ -86,4 +94,4 @@ const getAddonSlug = (url: URL): string => {
         throw new RouteError(400, "The 'addon' query param is empty (or contains only whitespace)");
     }
     return addonSlug;
-};
+}
