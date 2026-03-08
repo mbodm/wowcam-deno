@@ -46,6 +46,8 @@ function createPrettyStatus(status: number): string {
             return "HTTP 500 Internal Server Error";
         case 502:
             return "HTTP 502 Bad Gateway";
+        case 507:
+            return "HTTP 507 Insufficient Storage";
         default:
             return `HTTP ${status}`;
     }

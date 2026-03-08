@@ -40,7 +40,7 @@ export function refresh(url: URL): Response {
     return response.success("Background refreshing started");
 }
 
-export async function show(url: URL): Promise<Response> {
+export async function showCache(url: URL): Promise<Response> {
     requireAuth(url);
     const entries = await storage.getAll();
     const count = entries.length;
@@ -48,10 +48,10 @@ export async function show(url: URL): Promise<Response> {
     return response.success(`${count} ${word} in cache`, { entries });
 }
 
-export async function clear(url: URL): Promise<Response> {
+export async function clearCache(url: URL): Promise<Response> {
     requireAuth(url);
     console.log("Received request to clear storage");
-    await storage.clear();
+    await storage.clearAll();
     console.log("Cleared storage");
     return response.success("Cleared cache");
 }
@@ -60,6 +60,7 @@ function requireAuth(url: URL): void {
     // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
     // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
     // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
+    // And token is not in header to allow easy in-browser testing (this API does not follow REST conventions anyway)
     const tokenParam = url.searchParams.get("token");
     if (tokenParam === null) {
         throw new RouteError(401, "Unauthorized (missing 'token' query param)");
@@ -81,7 +82,7 @@ const getAddonSlug = (url: URL): string => {
     }
     const addonSlug = addonParam.toLowerCase().trim();
     if (addonSlug === "") {
-        throw new RouteError(400, "The 'addon' query param is empty (or contains whitespaces only)");
+        throw new RouteError(400, "The 'addon' query param is empty (or contains only whitespace)");
     }
     return addonSlug;
 };
