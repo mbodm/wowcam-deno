@@ -27,11 +27,10 @@ which are used by my WOWCAM application (now only acting as simple desktop clien
 
 ### How?
 
-- By using on-premise hosting on my [netcup](https://www.netcup.com) server
-- By developing everything directly on that machine (remote)
+- By developing everything directly on my Linux VPS server (remote)
 - By using _VS Code_ with active _Remote SSH_ extension
-- By using a DNS A-Record for the subdomain
-- By deploying everything to Deno Deploy (see above)
+- By using CI/CD with GitHub and Deno Deploy
+- By hosting and deploying with Deno Deploy (see above)
 
 ### Vibe coding?
 
