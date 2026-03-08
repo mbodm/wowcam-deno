@@ -4,9 +4,9 @@ WOWCAM backend service to scrape addon data
 
 ### What?
 
-- It's a very simple web API service (written in TS)
-- It calls a scraper web API service every 1h and cache the result
-- It is used to handle the  
+- It's a simple web service (written in TS)
+- It's the web backend front face for WOWCAM
+- It calls the wowcam-scraper API every 1h and cache the results
 - It's a small Deno project:
   - Offering a few HTTP GET endpoints
   - Using promises (via `async/await` statements)
@@ -14,11 +14,11 @@ WOWCAM backend service to scrape addon data
   - Not using any external packages or dependencies
   - All logging is done via `console.log()` and `console.error()`
   - See `src` folder and `deno.json` for details
-- Deno Deploy is used for deployment and production hosting:
+- Deno Deploy is used for production hosting:
   - Every push to `main` branch automatically deploys to staging
   - I manually deploy staging to live via Deno Deploy web UI
-  - All above mentioned logging is viewed via Deno Deploy web UI
-- Local deployment via `deno task dev` script (see `deno.json`)
+  - I inspect all above mentioned logging in Deno Deploy web UI
+- Project runs locally via `deno task dev` script (see `deno.json`)
 
 ### Why?
 
