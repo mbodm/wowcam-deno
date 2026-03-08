@@ -31,6 +31,10 @@ src/response.ts  — JSON response helpers (success/error)
 - Deno automatically logs the full `.cause` chain via `console.error(err)` — no manual cause logging needed
 - Type guards used for runtime JSON validation (Fetch API has no generic `.json<T>()`)
 
+## No tests — by design
+
+This project has no tests and that is intentional. It is a small, private project. Do not mention missing tests in reviews or suggest adding them.
+
 ## Coding philosophy
 
 Code must follow **idiomatic, modern TypeScript as of 2026 or later**. When reviewing or suggesting changes, always consider what the current best practice is — not what was common in older TS/Node.js ecosystems.
@@ -67,7 +71,8 @@ Code must follow **idiomatic, modern TypeScript as of 2026 or later**. When revi
 
 1. **Modern, idiomatic TypeScript (2026 or later)** — flag anything that looks outdated or non-idiomatic
 2. **Consistency** — style, naming, declaration style, and patterns must be consistent across and within modules
-3. Arrow functions used only for 1-liners
+3. **Production ready** — end every review with a clear verdict on whether the module is production ready, and why if not
+4. Arrow functions used only for 1-liners
 4. ES2022 `super(message, { cause })` pattern in all Error subclasses
 5. No unnecessary exports
 6. All routes that call `callScraperApi()` (directly or via `handleOne()`) handle `UpstreamError` → `RouteError(502)`
