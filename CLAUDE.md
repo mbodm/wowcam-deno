@@ -73,9 +73,9 @@ Code must follow **idiomatic, modern TypeScript as of 2026 or later**. When revi
 2. **Consistency** — style, naming, declaration style, and patterns must be consistent across and within modules
 3. **Production ready** — end every review with a clear verdict on whether the module is production ready, and why if not
 4. Arrow functions used only for 1-liners
-4. ES2022 `super(message, { cause })` pattern in all Error subclasses
-5. No unnecessary exports
-6. All routes that call `callScraperApi()` (directly or via `handleOne()`) handle `UpstreamError` → `RouteError(502)`
-7. No dead switch cases (e.g. status codes that can never reach `createPrettyStatus()`)
-8. HTTP spec compliance: 405 must include `Allow` header; 404/405 use null body
-9. English correctness in all names, comments, and error messages
+5. ES2022 `super(message, { cause })` pattern in all Error subclasses
+6. No unnecessary exports
+7. All routes that call `callScraperApi()` (directly or via `handleOne()`) handle `UpstreamError` → `RouteError(502)`
+8. No dead switch cases (e.g. status codes that can never reach `createPrettyStatus()`)
+9. HTTP spec compliance: 405 must include `Allow` header; 404/405 use null body
+10. English correctness in all names, comments, and error messages
