@@ -28,7 +28,7 @@ which are used by my WOWCAM application (now only acting as simple desktop clien
 ### How?
 
 - By developing everything directly on my Linux VPS server (remote)
-- By using _VS Code_ with active _Remote SSH_ extension
+- By using VS Code with active _Remote SSH_ extension
 - By doing CI/CD with GitHub and Deno Deploy
 - By hosting and deploying with Deno Deploy (see above)
 
