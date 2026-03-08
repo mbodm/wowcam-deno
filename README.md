@@ -1,6 +1,6 @@
 # wowcam-cache
 
-WOWCAM backend service to cache addon data
+WOWCAM backend service to provide addon data
 
 ### What?
 
