@@ -7,12 +7,12 @@ WOWCAM backend service to provide addon data
 - It's a simple web service (written in TS)
 - It's the web backend front face for WOWCAM desktop client
 - It calls the wowcam-scraper API every 1h and cache the results
-- It's a small Deno project:
+- It's a small Deno project
   - offering a few HTTP GET endpoints
   - using promises (via `async/await` statements)
   - using Deno KV for data storage
   - not using any external packages or dependencies
-  - logging via `console.log()` and `console.error()`
+  - doing all logging via `console.log()` and `console.error()`
   - See `CLAUDE.md` file, `src` folder and `deno.json` for details
 - Deno Deploy is used for production hosting:
   - Every push to `main` branch automatically deploys to staging
