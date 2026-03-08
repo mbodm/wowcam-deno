@@ -6,7 +6,7 @@ export function start() {
     Deno.serve(async (request: Request) => {
         // Everything is handled via HTTP GET requests to allow easy in-browser testing (this API does not follow REST conventions anyway)
         if (request.method !== "GET") {
-            return response.error("HTTP method not allowed", 405);
+            return new Response(null, { status: 405, headers: { "Allow": "GET" } });
         }
         const url = new URL(request.url);
         try {
@@ -29,11 +29,9 @@ export function start() {
             }
         }
         catch (err: unknown) {
+            // Deno automatically logs the full err ".cause" chain (no manual ".cause" log handling needed)
             console.error(err);
             if (err instanceof RouteError) {
-                if (err.cause) {
-                    console.error(err.cause);
-                }
                 return response.error(err.message, err.status);
             }
             return response.error("An internal server error occurred (check logs for details)", 500);

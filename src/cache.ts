@@ -11,8 +11,8 @@ export type AddonEntry = {
 
 export async function handleOne(addonSlug: string): Promise<AddonEntry> {
     const existingEntries = await storage.getAll();
-    // If in cache -> Use from cache
     const existingEntry = existingEntries.find((entry) => entry.addonSlug === addonSlug);
+    // If in cache -> Use from cache
     if (existingEntry) {
         return {
             ...existingEntry,

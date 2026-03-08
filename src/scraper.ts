@@ -15,8 +15,7 @@ export type ScrapeResult = {
 
 export class UpstreamError extends Error {
     constructor(message: string, cause?: unknown) {
-        super(message);
-        this.cause = cause;
+        super(message, { cause });
         this.name = "UpstreamError";
     }
 }

@@ -1,12 +1,11 @@
-import { handleOne, refreshAll } from "./logic.ts";
+import { handleOne, refreshAll } from "./cache.ts";
 import * as response from "./response.ts";
-import { callScraperApi } from "./scraper.ts";
+import { callScraperApi, UpstreamError } from "./scraper.ts";
 import * as storage from "./storage.ts";
 
 export class RouteError extends Error {
     constructor(public readonly status: number, message: string, cause?: unknown) {
-        super(message);
-        this.cause = cause;
+        super(message, { cause });
         this.name = "RouteError";
     }
 }
@@ -26,10 +25,13 @@ export async function scrape(url: URL): Promise<Response> {
     const addonSlug = getAddonSlug(url);
     try {
         const scrapeResult = await callScraperApi(addonSlug);
-        return response.success("Successfully scraped addon (not added it to cache)", scrapeResult);
+        return response.success("Successfully scraped addon (without adding it to cache)", scrapeResult);
     }
     catch (err: unknown) {
-        throw new RouteError(502, "An upstream error occurred (check logs for details)", err);
+        if (err instanceof UpstreamError) {
+            throw new RouteError(502, "An upstream error occurred (check logs for details)", err);
+        }
+        throw err;
     }
 }
 
@@ -44,8 +46,8 @@ export async function showCache(url: URL): Promise<Response> {
     requireAuth(url);
     const entries = await storage.getAll();
     const count = entries.length;
-    const word = count === 1 || count === -1 ? "entry" : "entries";
-    return response.success(`${count} ${word} in cache`, { entries });
+    const term = count === 1 ? "entry" : "entries";
+    return response.success(`${count} ${term} in cache`, { entries });
 }
 
 export async function clearCache(url: URL): Promise<Response> {
@@ -58,8 +60,7 @@ export async function clearCache(url: URL): Promise<Response> {
 
 function requireAuth(url: URL): void {
     // This should (of course) not replace any real security (it shall just act as some small script-kiddies barrier)
-    // Query param (to keep easy in-browser testing) seems OK (since there is no correct REST API design here anyway)
-    // Using such insecure solution seems better than nothing (since there is no sensible data to secure here anyway)
+    // Using a less secure solution seems better than nothing (since there is no sensible data to secure here anyway)
     // And token is not in header to allow easy in-browser testing (this API does not follow REST conventions anyway)
     const tokenParam = url.searchParams.get("token");
     if (tokenParam === null) {

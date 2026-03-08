@@ -1,9 +1,9 @@
-export type ServerSuccessResult = {
+type ServerSuccessResult = {
     infoMessage: string,
     statusInfo: string
 };
 
-export type ServerErrorResult = {
+type ServerErrorResult = {
     errorMessage: string,
     statusInfo: string
 };
@@ -15,7 +15,7 @@ export function error(error: string, status: number): Response {
     });
 }
 
-export function success<T extends object>(info: string, payload?: T): Response {
+export function success(info: string, payload?: Record<string, unknown>): Response {
     const statusInfo = createPrettyStatus(200);
     if (payload) {
         return createJsonResponse(200, {
@@ -40,8 +40,6 @@ function createPrettyStatus(status: number): string {
             return "HTTP 401 Unauthorized";
         case 403:
             return "HTTP 403 Forbidden";
-        case 404:
-            return "HTTP 404 Not Found";
         case 500:
             return "HTTP 500 Internal Server Error";
         case 502:
@@ -53,7 +51,7 @@ function createPrettyStatus(status: number): string {
     }
 }
 
-function createJsonResponse(status: number, serverResult: ServerErrorResult | ServerSuccessResult): Response {
+function createJsonResponse(status: number, serverResult: ServerSuccessResult | ServerErrorResult): Response {
     const json = JSON.stringify(serverResult, null, 4);
     return new Response(json, {
         status,
