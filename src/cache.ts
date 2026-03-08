@@ -1,6 +1,5 @@
 import * as storage from "./storage.ts";
 import { callScraperApi } from "./scraper.ts";
-import { RouteError } from "./routes.ts";
 
 export type AddonEntry = {
     addonSlug: string,
@@ -8,6 +7,13 @@ export type AddonEntry = {
     scrapedAt: string,
     fromCache: boolean
 };
+
+export class CacheLimitError extends Error {
+    constructor() {
+        super("Reached cache limit of 255 entries");
+        this.name = "CacheLimitError";
+    }
+}
 
 export async function handleOne(addonSlug: string): Promise<AddonEntry> {
     const existingEntries = await storage.getAll();
@@ -21,7 +27,7 @@ export async function handleOne(addonSlug: string): Promise<AddonEntry> {
     }
     // If not in cache -> Scrape and add to cache
     if (existingEntries.length >= 255) {
-        throw new RouteError(507, "Reached cache limit of 255 entries");
+        throw new CacheLimitError();
     }
     const scrapeResult = await callScraperApi(addonSlug);
     const { downloadUrl, scrapedAt } = scrapeResult;

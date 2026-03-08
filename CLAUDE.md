@@ -28,6 +28,7 @@ src/response.ts  — JSON response helpers (success/error)
 - `UpstreamError` propagates from scraper → caught in routes → re-thrown as `RouteError(502)`
 - Background refresh is fire-and-forget: `refreshAll().catch((err) => console.error(err))`
 - `refreshAll()` handles per-entry failures internally with try/catch — never throws to caller
+- `/refresh` is called externally by a GitHub Action every 1 hour — this is the intended cache TTL mechanism; the info message "1h max age" in `routes.ts` is intentional and correct
 - Deno automatically logs the full `.cause` chain via `console.error(err)` — no manual cause logging needed
 - Type guards used for runtime JSON validation (Fetch API has no generic `.json<T>()`)
 

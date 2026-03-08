@@ -1,4 +1,4 @@
-import { handleOne, refreshAll } from "./cache.ts";
+import { handleOne, CacheLimitError, refreshAll } from "./cache.ts";
 import * as response from "./response.ts";
 import { callScraperApi, UpstreamError } from "./scraper.ts";
 import * as storage from "./storage.ts";
@@ -23,6 +23,9 @@ export async function get(url: URL): Promise<Response> {
     catch (err: unknown) {
         if (err instanceof UpstreamError) {
             throw new RouteError(502, "An upstream error occurred in /get route (check logs for details)", err);
+        }
+        if (err instanceof CacheLimitError) {
+            throw new RouteError(507, err.message);
         }
         throw err;
     }
