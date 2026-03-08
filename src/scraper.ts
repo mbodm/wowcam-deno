@@ -43,12 +43,11 @@ export async function callScraperApi(addonSlug: string): Promise<ScrapeResult> {
     if (!isScraperApiSuccessResponse(content) || content.addonSlug.toLowerCase().trim() !== normalizedAddonSlug) {
         throw new UpstreamError("Response JSON from scraper API did not contain the expected addon slug and download URL (even when status code was HTTP 200)");
     }
-    const result: ScrapeResult = {
+    return {
         addonSlug: normalizedAddonSlug,
         downloadUrl: content.downloadUrl.trim(),
         scrapedAt: new Date().toISOString().slice(0, 16) + "Z"
     };
-    return result;
 }
 
 // Type Guards

@@ -35,14 +35,14 @@ export async function handleOne(addonSlug: string): Promise<AddonEntry> {
     return {
         ...scrapeResult,
         fromCache: false
-    }
+    };
 }
 
 export async function refreshAll(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 3000));
     const entries = await storage.getAll();
     const total = entries.length;
-    if (total <= 0) {
+    if (total === 0) {
         console.log("Nothing to refresh (storage is empty)");
         return;
     }

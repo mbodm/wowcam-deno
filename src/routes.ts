@@ -22,7 +22,7 @@ export async function get(url: URL): Promise<Response> {
     }
     catch (err: unknown) {
         if (err instanceof UpstreamError) {
-            throw new RouteError(502, "An upstream error occurred in /get route (check logs for details)", err);
+            throw new RouteError(502, "An upstream error occurred in the /get route (check logs for details)", err);
         }
         if (err instanceof CacheLimitError) {
             throw new RouteError(507, err.message);
@@ -40,7 +40,7 @@ export async function scrape(url: URL): Promise<Response> {
     }
     catch (err: unknown) {
         if (err instanceof UpstreamError) {
-            throw new RouteError(502, "An upstream error occurred in /scrape route (check logs for details)", err);
+            throw new RouteError(502, "An upstream error occurred in the /scrape route (check logs for details)", err);
         }
         throw err;
     }
