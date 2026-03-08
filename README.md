@@ -1,6 +1,6 @@
 # wowcam-cache
 
-WOWCAM backend service to scrape addon data
+WOWCAM backend service to cache addon data
 
 ### What?
 
@@ -13,7 +13,7 @@ WOWCAM backend service to scrape addon data
   - Using Deno KV for data storage
   - Not using any external packages or dependencies
   - All logging is done via `console.log()` and `console.error()`
-  - See `src` folder and `deno.json` for details
+  - See `CLAUDE.md` file, `src` folder and `deno.json` for details
 - Deno Deploy is used for production hosting:
   - Every push to `main` branch automatically deploys to staging
   - I manually deploy staging to live via Deno Deploy web UI
