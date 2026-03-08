@@ -5,7 +5,7 @@ WOWCAM backend service to provide addon data
 ### What?
 
 - It's a simple web service (written in TS)
-- It's the web backend front face for WOWCAM desktop client
+- It's the web backend front face for the WOWCAM desktop client
 - It calls the wowcam-scraper API every 1h and cache the results
 - It's a small Deno project
   - offering a few HTTP GET endpoints
