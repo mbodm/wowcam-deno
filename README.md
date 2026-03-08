@@ -36,8 +36,8 @@ which are used by my WOWCAM application (now only acting as simple desktop clien
 
 - Initially i built this project manually as a 25+ years experienced senior developer
 - Today it's developed and maintained with AI assistance (primarily Claude)
-- AI agents can use the [AGENTS.md](AGENTS.md) file for repository-specific guidance
-- No changes are released before I personally review them in detail
+- Claude Code can use the [CLAUDE.md](CLAUDE.md) file for repository-specific guidance
+- No changes are released before i personally review them in detail
 
 ### Production caveats?
 
