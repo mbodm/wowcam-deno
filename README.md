@@ -13,7 +13,7 @@ WOWCAM backend service to provide addon data
   - using Deno KV for data storage
   - not using any external packages or dependencies
   - doing all logging via `console.log()` and `console.error()`
-  - See `CLAUDE.md` file or `src` folder and `deno.json` for details
+  - See `src` folder and `deno.json` for details
 - Deno Deploy is used for production hosting:
   - Every push to `main` branch automatically deploys to staging
   - I manually deploy staging to live via Deno Deploy web UI
