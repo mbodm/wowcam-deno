@@ -54,7 +54,7 @@ function buildKvKey(addonSlug: string): MyKvKey {
     return ["addon", normalizedAddonSlug] as const;
 }
 
+// Sadly Deno.KvListIterator<> does not support a generic type T for the key (so we do a bit more complex typing here and use an explicit cast)
+// Otherwise we would need a type guard for every entry in every loop iteration (even though the key shape is already safe at runtime via prefix)
 const getKvEntries = (): AsyncIterableIterator<Deno.KvEntry<MyKvValue> & { key: MyKvKey }> =>
-    // Sadly Deno.KvListIterator<> does not support a generic type T for the key (so we do a bit more complex typing here and use an explicit cast)
-    // Otherwise we would need a type guard for every entry in every loop iteration (even though the key shape is already safe at runtime via prefix)
     kv.list<MyKvValue>({ prefix: ["addon"] }) as AsyncIterableIterator<Deno.KvEntry<MyKvValue> & { key: MyKvKey }>;
