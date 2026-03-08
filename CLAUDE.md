@@ -43,7 +43,7 @@ Code must follow **idiomatic, modern TypeScript as of 2026 or later**. When revi
 ## Coding rules (user preferences)
 
 ### Function declarations
-- Arrow functions only for 1-liners. Multi-line functions must use `function` declarations.
+- Arrow functions only for single expressions (no block body `{ }`). Wrapping a single expression across 2 lines for readability is fine. Multi-statement functions must use `function` declarations.
 
 ### Error classes
 - Always use ES2022 cause pattern: `super(message, { cause })` — never `this.cause = cause`.
@@ -73,7 +73,7 @@ Code must follow **idiomatic, modern TypeScript as of 2026 or later**. When revi
 1. **Modern, idiomatic TypeScript (2026 or later)** — flag anything that looks outdated or non-idiomatic
 2. **Consistency** — style, naming, declaration style, and patterns must be consistent across and within modules
 3. **Production ready** — end every review with a clear verdict on whether the module is production ready, and why if not
-4. Arrow functions used only for 1-liners
+4. Arrow functions used only for single expressions (no block body) — wrapping across 2 lines for readability is fine
 5. ES2022 `super(message, { cause })` pattern in all Error subclasses
 6. No unnecessary exports
 7. All routes that call `callScraperApi()` (directly or via `handleOne()`) handle `UpstreamError` → `RouteError(502)`
