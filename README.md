@@ -5,8 +5,8 @@ WOWCAM backend service to provide addon data
 ### What?
 
 - It's a simple web service (written in TS)
-- It's the web backend front face for the WOWCAM desktop client
-- It calls the wowcam-scraper API every 1h and cache the results
+- It's the frontend-facing backend for the WOWCAM desktop client
+- It calls the wowcam-scraper API every 1h and caches the results
 - It's a small Deno project
   - offering a few HTTP GET endpoints
   - using promises (via `async/await` statements)
@@ -22,12 +22,12 @@ WOWCAM backend service to provide addon data
 
 ### Why?
 
-To have some backend API, that handles, scrapes, and caches addon download URLs,  
-which are used by my WOWCAM application (now acting only as simple desktop client).
+To have some backend API that handles, scrapes, and caches addon download URLs,  
+which are used by my WOWCAM application (now acting only as a simple desktop client).
 
 ### How?
 
-- By developing everything directly on my Linux VPS server (remote)
+- By developing everything remotely on my Linux VPS server
 - By using VS Code with active _Remote SSH_ extension on my Mac
 - By doing CI/CD with GitHub and Deno Deploy
 - By hosting and deploying with Deno Deploy
@@ -37,7 +37,7 @@ which are used by my WOWCAM application (now acting only as simple desktop clien
 - Initially i built this project manually as a 25+ years experienced senior developer
 - Today it's developed and maintained with AI assistance (primarily Claude)
 - Claude Code can use the [CLAUDE.md](CLAUDE.md) file for repository-specific guidance
-- No changes are released before i personally review them in detail
+- No changes are released before I personally review them in detail
 
 #### Have fun.
 
