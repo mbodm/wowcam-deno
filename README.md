@@ -23,7 +23,7 @@ WOWCAM backend service to provide addon data
 ### Why?
 
 To have some backend API, that handles, scrapes, and caches addon download URLs,  
-which are used by my WOWCAM application (now only acting as simple desktop client).
+which are used by my WOWCAM application (now acting only as simple desktop client).
 
 ### How?
 
