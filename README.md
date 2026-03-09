@@ -30,7 +30,7 @@ which are used by my WOWCAM application (now acting only as simple desktop clien
 - By developing everything directly on my Linux VPS server (remote)
 - By using VS Code with active _Remote SSH_ extension on my Mac
 - By doing CI/CD with GitHub and Deno Deploy
-- By hosting and deploying with Deno Deploy (see above)
+- By hosting and deploying with Deno Deploy
 
 ### Vibe coding?
 
