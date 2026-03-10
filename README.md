@@ -34,7 +34,7 @@ which are used by my WOWCAM application (now acting only as a simple desktop cli
 
 ### Vibe coding?
 
-- Initially i built this project manually as a 25+ years experienced senior developer
+- Initially I built this project manually as a 25+ years experienced senior developer
 - Today it's developed and maintained with AI assistance (primarily Claude)
 - Claude Code can use the [CLAUDE.md](CLAUDE.md) file for repository-specific guidance
 - No changes are released before I personally review them in detail
