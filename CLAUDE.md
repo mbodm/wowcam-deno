@@ -1,4 +1,4 @@
-# wowcam-deno — Claude Context
+# wowcam-cache — Claude Context
 
 ## What this project is
 
